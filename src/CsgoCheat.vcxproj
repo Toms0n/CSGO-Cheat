@@ -139,14 +139,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CsgoHack.cpp" />
+    <ClCompile Include="CsgoCheat.cpp" />
+    <ClCompile Include="WinScreenHandler.cpp" />
+    <ClCompile Include="Math.cpp" />
+    <ClCompile Include="MemoryManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Vec3.cpp" />
+    <ClCompile Include="ProcessHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CshoHackHeader.h" />
+    <ClInclude Include="CsgoCheatHeader.h" />
+    <ClInclude Include="WinScreenHandlerH.h" />
+    <ClInclude Include="MathH.h" />
+    <ClInclude Include="MemoryManagerH.h" />
     <ClInclude Include="Offsets.h" />
-    <ClInclude Include="Vec3Header.h" />
+    <ClInclude Include="ProcessHandlerH.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

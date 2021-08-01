@@ -155,3 +155,6 @@ constexpr auto set_abs_origin = 0x1E0900;
 
 // other
 constexpr auto PLAYERS_INDEX_SEPERATION = 0x10; // player pointers in csgo are seperated with 0x10 in the entity list
+constexpr auto PELVIS_BONE_ID = 0;
+constexpr auto NECK_BONE_ID = 7;
+constexpr auto HEAD_BONE_ID = 8;
