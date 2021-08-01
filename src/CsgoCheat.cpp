@@ -1,9 +1,6 @@
 #include "Offsets.h"
-#include "CsgoCheatHeader.h"
-#include "MemoryManagerH.h"
-#include "WinScreenHandlerH.h"
-#include "ProcessHandlerH.h"
-#include "MathH.h"
+#include "CsgoCheatH.h"
+
 
 CsgoAimbot::CsgoAimbot()
 	: 
