@@ -141,15 +141,13 @@
   <ItemGroup>
     <ClCompile Include="CsgoCheat.cpp" />
     <ClCompile Include="WinScreenHandler.cpp" />
-    <ClCompile Include="Math.cpp" />
     <ClCompile Include="MemoryManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ProcessHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CsgoCheatHeader.h" />
+    <ClInclude Include="CsgoCheatH.h" />
     <ClInclude Include="WinScreenHandlerH.h" />
-    <ClInclude Include="MathH.h" />
     <ClInclude Include="MemoryManagerH.h" />
     <ClInclude Include="Offsets.h" />
     <ClInclude Include="ProcessHandlerH.h" />

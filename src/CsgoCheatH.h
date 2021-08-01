@@ -3,7 +3,10 @@
 #include <iostream>
 #include <Windows.h>
 #include <TlHelp32.h>
-
+#include "MemoryManagerH.h"
+#include "WinScreenHandlerH.h"
+#include "ProcessHandlerH.h"
+#include "MathH.h"
 
 class CsgoAimbot
 {
