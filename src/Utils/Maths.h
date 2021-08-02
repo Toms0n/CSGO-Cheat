@@ -11,7 +11,6 @@ Credits to TeamGamerFood and giovanni-orciuolo (on github)
 
 #pragma once
 
-#include "DoubleSDK.h"
 #include <math.h>
 
 
@@ -23,12 +22,12 @@ Credits to TeamGamerFood and giovanni-orciuolo (on github)
 #define DEG2RAD( x )  ( (float)(x) * (float)( M_PI_F / 180.f ) )
 #define RAD2DEG( x )  ( (float)(x) * (float)( 180.f / M_PI_F ) )
 
-#pragma warning(disable : 4244)
+//#pragma warning(disable : 4244)
 
 class Vector3;
 class CMath;
 
-/// TEAMGAMERFOOD 1337 SQRT: THE FASTEST SQRT ALIVE
+/// THE FASTEST SQRT ALIVE
 double inline __declspec ( naked ) __stdcall FastSQRT( double n )
 {
 	_asm fld qword ptr[ esp + 4 ]
@@ -42,39 +41,42 @@ public:
 	float x, y, z;
 
 	Vector3()
+		: x(0.f), y(0.f), z(0.f)
 	{
-		x = y = z = 0.0f;
 	}
 
 	Vector3( float X, float Y, float Z )
+		: x(X), y(Y), z(Z)
 	{
-		x = X; y = Y; z = Z;
 	}
 
 	Vector3( float XYZ )
+		: x(XYZ), y(XYZ), z(XYZ)
 	{
-		x = XYZ; y = XYZ; z = XYZ;
 	}
 
-	Vector3( float* v )
-	{
-		x = v[ 0 ]; y = v[ 1 ]; z = v[ 2 ];
-	}
+	//Vector3( float* v )
+	//{
+	//	x = v[ 0 ]; y = v[ 1 ]; z = v[ 2 ];
+	//}
 
-	Vector3( const float* v )
-	{
-		x = v[ 0 ]; y = v[ 1 ]; z = v[ 2 ];
-	}
+	//Vector3( const float* v )
+	//{
+	//	x = v[ 0 ]; y = v[ 1 ]; z = v[ 2 ];
+	//}
 
 	inline Vector3& operator=( const Vector3& v )
 	{
-		x = v.x; y = v.y; z = v.z; return *this;
+		x = v.x;
+		y = v.y;
+		z = v.z;
+		return *this;
 	}
 
-	inline Vector3& operator=( const float* v )
-	{
-		x = v[ 0 ]; y = v[ 1 ]; z = v[ 2 ]; return *this;
-	}
+	//inline Vector3& operator=( const float* v )
+	//{
+	//	x = v[ 0 ]; y = v[ 1 ]; z = v[ 2 ]; return *this;
+	//}
 
 	inline float& operator[]( int i )
 	{
@@ -88,42 +90,66 @@ public:
 
 	inline Vector3& operator+=( const Vector3& v )
 	{
-		x += v.x; y += v.y; z += v.z; return *this;
+		x += v.x; 
+		y += v.y;
+		z += v.z; 
+		return *this;
 	}
 
 	inline Vector3& operator-=( const Vector3& v )
 	{
-		x -= v.x; y -= v.y; z -= v.z; return *this;
+		x -= v.x; 
+		y -= v.y; 
+		z -= v.z; 
+		return *this;
 	}
 
 	inline Vector3& operator*=( const Vector3& v )
 	{
-		x *= v.x; y *= v.y; z *= v.z; return *this;
+		x *= v.x;
+		y *= v.y;
+		z *= v.z; 
+		return *this;
 	}
 
 	inline Vector3& operator/=( const Vector3& v )
 	{
-		x /= v.x; y /= v.y; z /= v.z; return *this;
+		x /= v.x; 
+		y /= v.y;
+		z /= v.z; 
+		return *this;
 	}
 
 	inline Vector3& operator+=( float v )
 	{
-		x += v; y += v; z += v; return *this;
+		x += v;
+		y += v;
+		z += v; 
+		return *this;
 	}
 
 	inline Vector3& operator-=( float v )
 	{
-		x -= v; y -= v; z -= v; return *this;
+		x -= v;
+		y -= v;
+		z -= v; 
+		return *this;
 	}
 
 	inline Vector3& operator*=( float v )
 	{
-		x *= v; y *= v; z *= v; return *this;
+		x *= v; 
+		y *= v;
+		z *= v; 
+		return *this;
 	}
 
 	inline Vector3& operator/=( float v )
 	{
-		x /= v; y /= v; z /= v; return *this;
+		x /= v;
+		y /= v; 
+		z /= v; 
+		return *this;
 	}
 
 	inline Vector3 operator-( ) const
@@ -336,7 +362,7 @@ public:
 
 	Vector3 CalcAngle( Vector3 Source, Vector3 Destination )
 	{
-		#pragma warning(disable : 4244)
+		//#pragma warning(disable : 4244)
 		Vector3 angles;
 		Vector3 delta;
 		delta.x = (Source.x - Destination.x);

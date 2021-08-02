@@ -1,10 +1,11 @@
 #pragma once
 
-#include <Windows.h>
+#include <windows.h>
 #include <TlHelp32.h>
 #include <iostream>
 #include <string>
-
+#include <cassert> 
+#include <memory>
 
 class ProcessHandler
 {
@@ -23,18 +24,27 @@ private:
 	MODULEENTRY32 EngineDLL; // Struct for Engine.dll
 
 public:
+
+	// Calls Init() to initialize the ProcessHandler.
 	ProcessHandler();
+
+	// Close the HANDLE of the object.
+	// The HANDLE must be closed, otherwise there is a memory leak.
 	~ProcessHandler();
+
+	// Initializes the class to read from and write to the given process memory.
+	// Returns: True if the initialization is successful.
+	BOOL Init(const std::string& processName = "csgo.exe");
 
 	/*
 	* Traverse the process list to get the handle of the given process name.
 	* Once attached it sets the hProcess and the dwProcessID of the class.
 	* 
-	* [proc_name] => the name of the process of which the handle is required
+	* [procName] => the name of the process of which the handle is required
 	* 
 	* [RETURNS] => True if the process is found and valid.
 	*/
-	BOOL AttachProcess(const std::string& proc_name);
+	BOOL AttachProcess(const std::string& procName);
 
 	/*
 	* Traverse the module list to get the base address of the given module name.
@@ -43,12 +53,12 @@ public:
 	* [hProc] => the handle of the processes of the game
 	* [modName] => the module name to get the base address of
 	*
-	* [RETURNS] => Module entry struct for the module found. Base address = 0x0 if not found.
+	* RETURNS: Module entry struct for the module found. Base address = 0x0 if not found.
 	*/
-	MODULEENTRY32 GetModuleBaseAddress(const std::string& modName);
+	MODULEENTRY32 GetModule(const std::string& modName);
 
 	// Getters
-	std::string GetProcessName();
+	std::string& GetProcessName();
 	HANDLE GetProcHandle();
 	DWORD GetProcID();
 	DWORD GetClientBase();
@@ -57,9 +67,4 @@ public:
 	DWORD GetEngineSize();
 	MODULEENTRY32 GetClient();
 	MODULEENTRY32 GetEngine();
-
-	// Close the HANDLE of the object.
-	// The HANDLE must be closed, otherwise there is a memory leak.
-	// Returns: True if the function is successful.
-	BOOL ClearHandle();
 };

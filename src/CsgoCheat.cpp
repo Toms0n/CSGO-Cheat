@@ -4,49 +4,53 @@
 
 CsgoAimbot::CsgoAimbot()
 	: 
-	m_Mm(MemoryManager()),
-	m_Wsh(WinScreenHandler()),
-	m_Ph(ProcessHandler()),
-	crosshairX(m_Wsh.GetScreenWidth() / 2),
-	crosshairY(m_Wsh.GetScreenHeight() / 2)
+	m_Ph(std::make_shared<ProcessHandler>()),
+	m_Mm(std::make_unique<MemoryManager>(m_Ph)),
+	m_Wsh(std::make_unique<WinScreenHandler>()),
+	crosshairX(m_Wsh->GetScreenWidth() / 2),
+	crosshairY(m_Wsh->GetScreenHeight() / 2)
+{
+}
+
+CsgoAimbot::~CsgoAimbot()
 {
 }
 
 INT CsgoAimbot::GetTeamOfPlayer(UINT playerAddr)
 {
-	return m_Mm.RPM<INT>(playerAddr + m_iTeamNum);
+	return m_Mm->RPM<INT>(playerAddr + m_iTeamNum);
 }
 
 UINT CsgoAimbot::GetLocalPlayerAddr()
 {
-	return m_Mm.RPM<UINT>(m_Ph.GetModBaseAddr() + dwLocalPlayer);
+	return m_Mm->RPM<UINT>(m_Ph->GetClientBase() + dwLocalPlayer);
 }
 
 UINT CsgoAimbot::GetPlayerAddr(UINT playerIndex)
 {
-	return m_Mm.RPM<UINT>(m_Ph.GetModBaseAddr() + dwEntityList + (playerIndex * PLAYERS_INDEX_SEPERATION));
+	return m_Mm->RPM<UINT>(m_Ph->GetClientBase() + dwEntityList + (playerIndex * PLAYERS_INDEX_SEPERATION));
 }
 
 INT CsgoAimbot::GetPlayerHP(UINT playerAddr)
 {
-	return m_Mm.RPM<INT>(playerAddr + m_iHealth);
+	return m_Mm->RPM<INT>(playerAddr + m_iHealth);
 }
 
-Math::Vec3 CsgoAimbot::GetPlayerLocation(UINT playerAddr)
+Vector3 CsgoAimbot::GetPlayerLocation(UINT playerAddr)
 {
-	return m_Mm.RPM<Math::Vec3>(playerAddr + m_vecOrigin);
+	return m_Mm->RPM<Vector3>(playerAddr + m_vecOrigin);
 }
 
 BOOL CsgoAimbot::DormantCheck(UINT playerAddr)
 {
-	return m_Mm.RPM<BOOL>(playerAddr + m_bDormant);
+	return m_Mm->RPM<BOOL>(playerAddr + m_bDormant);
 }
 
-Math::Vec3 CsgoAimbot::GetBoneLoc(UINT playerAddr, uint32_t boneId)
+Vector3 CsgoAimbot::GetBoneLoc(UINT playerAddr, uint32_t boneId)
 {
-	UINT baseBoneMatAddr = m_Mm.RPM<UINT>(playerAddr + m_dwBoneMatrix);
-	Math::boneMatrix boneMat = 
-		m_Mm.RPM<Math::boneMatrix>(baseBoneMatAddr + (sizeof(Math::boneMatrix) * boneId));
+	UINT baseBoneMatAddr = m_Mm->RPM<UINT>(playerAddr + m_dwBoneMatrix);
+	matrix boneMat = 
+		m_Mm->RPM<Math::boneMatrix>(baseBoneMatAddr + (sizeof(Math::boneMatrix) * boneId));
 	return Math::Vec3(boneMat.x, boneMat.y, boneMat.z);
 }
 

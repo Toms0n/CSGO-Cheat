@@ -2,12 +2,47 @@
 
 ProcessHandler::ProcessHandler()
 {
-	// TODO: maybe init the private data?
+	if (Init())
+	{
+		std::cout << "Sucessfully initialized ProcessHandler with process name: " << ProcName << std::endl;
+	}
+	else
+	{
+		std::cout << "Failed to initialize ProcessHandler to process " << ProcName << std::endl;
+	}
 }
 
 ProcessHandler::~ProcessHandler()
 {
-	ClearHandle();
+	assert(this->h_Proc); // the handle should be active to be able to close it
+
+	if (CloseHandle(this->h_Proc))
+	{
+		std::cout << "Sucessfully closed handle: " << this->h_Proc << std::endl;
+	}
+	else
+	{
+		std::cout << "Failed to close handle: " << this->h_Proc << std::endl;
+	}
+}
+
+BOOL ProcessHandler::Init(const std::string& processName = "csgo.exe")
+{
+	// Attach to the process.
+	if (!AttachProcess(processName)) return FALSE;
+
+	// Get the required modules of CS:GO for accessing/writing in memory later on.
+	ClientDLL = GetModule("client.dll");
+	EngineDLL = GetModule("engine.dll");
+	if (ClientDLL.modBaseAddr == 0x0 || EngineDLL.modBaseAddr == 0x0) return FALSE;
+
+	// Store base addresses and size of all the required modules.
+	ClientBase = reinterpret_cast<DWORD>(ClientDLL.modBaseAddr);
+	EngineBase = reinterpret_cast<DWORD>(EngineDLL.modBaseAddr);
+	ClientSize = ClientDLL.modBaseSize;
+	EngineSize = EngineDLL.modBaseSize;
+
+	return TRUE;
 }
 
 BOOL ProcessHandler::AttachProcess(const std::string& proc_name)
@@ -57,8 +92,10 @@ BOOL ProcessHandler::AttachProcess(const std::string& proc_name)
 	return FALSE;
 }
 
-MODULEENTRY32 ProcessHandler::GetModuleBaseAddress(const std::string& moduleName)
+MODULEENTRY32 ProcessHandler::GetModule(const std::string& moduleName)
 {
+	assert(this->dw_ProcID && this->h_Proc); // Get module info only when there is an attached process.
+
 	auto hModulesSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, this->dw_ProcID);
 
 	MODULEENTRY32 modEnt;
@@ -92,16 +129,11 @@ MODULEENTRY32 ProcessHandler::GetModuleBaseAddress(const std::string& moduleName
 	return modEnt;
 }
 
-BOOL ProcessHandler::ClearHandle()
-{
-	return (CloseHandle(this->h_Proc) == TRUE);
-}
-
 // Getters
-std::string ProcessHandler::GetProcessName() { return this->ProcName; }
+std::string& ProcessHandler::GetProcessName() { return this->ProcName; }
 HANDLE ProcessHandler::GetProcHandle() { return this->h_Proc; }
 DWORD ProcessHandler::GetProcID() { return this->dw_ProcID; }
-DWORD ProcessHandler::GetClientBase() { return this->ClientBase; }
+DWORD ProcessHandler::GetClientBase() { std::cout << "Client Base Addr: " << this->ClientBase << std::endl; return this->ClientBase; }
 DWORD ProcessHandler::GetClientSize() { return this->ClientSize; }
 DWORD ProcessHandler::GetEngineBase() { return this->EngineBase; }
 DWORD ProcessHandler::GetEngineSize() { return this->EngineSize; }
