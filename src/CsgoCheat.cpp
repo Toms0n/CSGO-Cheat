@@ -46,42 +46,44 @@ BOOL CsgoAimbot::DormantCheck(UINT playerAddr)
 	return m_Mm->RPM<BOOL>(playerAddr + m_bDormant);
 }
 
-Vector3 CsgoAimbot::GetBoneLoc(UINT playerAddr, uint32_t boneId)
-{
-	UINT baseBoneMatAddr = m_Mm->RPM<UINT>(playerAddr + m_dwBoneMatrix);
-	matrix boneMat = 
-		m_Mm->RPM<Math::boneMatrix>(baseBoneMatAddr + (sizeof(Math::boneMatrix) * boneId));
-	return Math::Vec3(boneMat.x, boneMat.y, boneMat.z);
-}
+// TODO:
+//Vector3 CsgoAimbot::GetBoneLoc(UINT playerAddr, uint32_t boneId)
+//{
+//	UINT baseBoneMatAddr = m_Mm->RPM<UINT>(playerAddr + m_dwBoneMatrix);
+//	matrix boneMat = 
+//		m_Mm->RPM<Math::boneMatrix>(baseBoneMatAddr + (sizeof(Math::boneMatrix) * boneId));
+//	return Vector3(boneMat.x, boneMat.y, boneMat.z);
+//}
 
-UINT CsgoAimbot::FindClosestEnemy(uint32_t boneId)
-{
-	FLOAT Finish;
-	INT ClosestEntity = 1;
-	Math::Vec3 Calc = { 0, 0, 0 };
-	FLOAT Closest = FLT_MAX;
-	INT localTeam = GetTeamOfPlayer(GetLocalPlayerAddr());
-
-	for (UINT i = 1; i < 32; ++i) //Loops through all the entitys in the index 1-32.
-	{
-		UINT Entity = GetPlayerAddr(i);
-		INT EnmTeam = GetTeamOfPlayer(Entity); if (EnmTeam == localTeam) continue;
-		INT EnmHealth = GetPlayerHP(Entity); if (EnmHealth < 1 || EnmHealth > 100) continue;
-		BOOL Dormant = DormantCheck(Entity); if (Dormant) continue;
-
-		const Math::viewMatrix vm = m_Mm.RPM<Math::viewMatrix>(m_Ph.GetModBaseAddr() + dwViewMatrix);
-
-		Math::Vec3 headBone = Math::WorldToScreen(GetBoneLoc(Entity, boneId), vm);
-		Finish = Math::distance(headBone.x, headBone.y, this->crosshairX, this->crosshairY);
-		if (Finish < Closest)
-		{
-			Closest = Finish;
-			ClosestEntity = i;
-		}
-	}
-
-	return ClosestEntity;
-}
+// TODO:
+//UINT CsgoAimbot::FindClosestEnemy(uint32_t boneId)
+//{
+//	FLOAT Finish;
+//	INT ClosestEntity = 1;
+//	Vector3 Calc = { 0, 0, 0 };
+//	FLOAT Closest = FLT_MAX;
+//	INT localTeam = GetTeamOfPlayer(GetLocalPlayerAddr());
+//
+//	for (UINT i = 1; i < 32; ++i) //Loops through all the entitys in the index 1-32.
+//	{
+//		UINT Entity = GetPlayerAddr(i);
+//		INT EnmTeam = GetTeamOfPlayer(Entity); if (EnmTeam == localTeam) continue;
+//		INT EnmHealth = GetPlayerHP(Entity); if (EnmHealth < 1 || EnmHealth > 100) continue;
+//		BOOL Dormant = DormantCheck(Entity); if (Dormant) continue;
+//
+//		const Math::viewMatrix vm = m_Mm.RPM<Math::viewMatrix>(m_Ph.GetModBaseAddr() + dwViewMatrix);
+//
+//		Math::Vec3 headBone = Math::WorldToScreen(GetBoneLoc(Entity, boneId), vm);
+//		Finish = Math::distance(headBone.x, headBone.y, this->crosshairX, this->crosshairY);
+//		if (Finish < Closest)
+//		{
+//			Closest = Finish;
+//			ClosestEntity = i;
+//		}
+//	}
+//
+//	return ClosestEntity;
+//}
 
 
 

@@ -26,10 +26,10 @@ ProcessHandler::~ProcessHandler()
 	}
 }
 
-BOOL ProcessHandler::Init(const std::string& processName = "csgo.exe")
+BOOL ProcessHandler::Init()
 {
 	// Attach to the process.
-	if (!AttachProcess(processName)) return FALSE;
+	if (!AttachProcess("csgo.exe")) return FALSE;
 
 	// Get the required modules of CS:GO for accessing/writing in memory later on.
 	ClientDLL = GetModule("client.dll");

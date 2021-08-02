@@ -54,13 +54,15 @@ public:
 	BOOL DormantCheck(UINT playerAddr);
 
 	/*
+	* // TODO:
 	* Fetch the given player head bone from memory
 	*/
-	Vector3 GetBoneLoc(UINT playerAddr, uint32_t boneId);
+	//Vector3 GetBoneLoc(UINT playerAddr, uint32_t boneId);
 
 	/*
+	* // TODO:
 	* Find the closest enemy to us by calculating distances from us to each other player and retrieve
 	* the closest player that is an enemy, has health and is real. Retrun the player addr of the closest enemy.
 	*/
-	UINT FindClosestEnemy(uint32_t boneId);
+	//UINT FindClosestEnemy(uint32_t boneId);
 };

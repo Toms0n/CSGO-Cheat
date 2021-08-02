@@ -1,5 +1,4 @@
 #include "WinScreenHandlerH.h"
-#include <Windows.h>
 
 WinScreenHandler::WinScreenHandler()
 	:

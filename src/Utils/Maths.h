@@ -13,7 +13,6 @@ Credits to TeamGamerFood and giovanni-orciuolo (on github)
 
 #include <math.h>
 
-
 #define M_RADPI 57.295779513082f
 #define M_PI 3.14159265358979323846
 #define M_PI_F ((float)(M_PI))
@@ -22,17 +21,16 @@ Credits to TeamGamerFood and giovanni-orciuolo (on github)
 #define DEG2RAD( x )  ( (float)(x) * (float)( M_PI_F / 180.f ) )
 #define RAD2DEG( x )  ( (float)(x) * (float)( 180.f / M_PI_F ) )
 
-//#pragma warning(disable : 4244)
-
-class Vector3;
-class CMath;
+#pragma warning(disable : 4244) //check: https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-2-c4244?redirectedfrom=MSDN&view=msvc-160
 
 /// THE FASTEST SQRT ALIVE
 double inline __declspec ( naked ) __stdcall FastSQRT( double n )
 {
-	_asm fld qword ptr[ esp + 4 ]
-	_asm fsqrt
-	_asm ret 8
+	__asm {
+		fld qword ptr[esp + 4]
+		fsqrt
+		ret 8
+	}
 }
 
 class Vector3
@@ -245,11 +243,11 @@ public:
 	}
 };
 
-/// TODO: Maybe update this class, for now I need it only in W2S
+/// TODO: Maybe update this class, for now I need it only in WorldToScreen
 class Vector2
 {
 public:
-	float x,y;
+	float x, y;
 };
 
 class CMath
@@ -263,9 +261,9 @@ public:
 
 	void inline SinCos( float radians, float *sine, float *cosine )
 	{
-		_asm
+		__asm
 		{
-			fld		DWORD PTR[ radians ]
+				fld		DWORD PTR[ radians ]
 				fsincos
 
 				mov edx, DWORD PTR[ cosine ]
@@ -362,7 +360,7 @@ public:
 
 	Vector3 CalcAngle( Vector3 Source, Vector3 Destination )
 	{
-		//#pragma warning(disable : 4244)
+		#pragma warning(disable : 4244)
 		Vector3 angles;
 		Vector3 delta;
 		delta.x = (Source.x - Destination.x);
@@ -442,5 +440,3 @@ public:
 	}
 
 };
-
-CMath Math;

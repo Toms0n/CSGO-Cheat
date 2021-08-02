@@ -34,7 +34,8 @@ public:
 
 	// Initializes the class to read from and write to the given process memory.
 	// Returns: True if the initialization is successful.
-	BOOL Init(const std::string& processName = "csgo.exe");
+	BOOL Init();
+	//BOOL Init(const std::string& processName = "csgo.exe");
 
 	/*
 	* Traverse the process list to get the handle of the given process name.
