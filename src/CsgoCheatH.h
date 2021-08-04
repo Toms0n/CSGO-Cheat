@@ -7,14 +7,16 @@
 #include "WinScreenHandlerH.h"
 #include "ProcessHandlerH.h"
 #include "Utils/Maths.h"
+#include "Utils/Enums.h"
 #include "Utils/Utils.h"
 
 class CsgoAimbot
 {
 private:
-	std::shared_ptr < ProcessHandler > m_Ph;
-	std::unique_ptr < MemoryManager > m_Mm;
-	std::unique_ptr < WinScreenHandler > m_Wsh;
+	std::shared_ptr<ProcessHandler> m_Ph;
+	std::unique_ptr<MemoryManager> m_Mm;
+	std::unique_ptr<WinScreenHandler> m_Wsh;
+	std::unique_ptr<CMath> m_Cmath;
 	INT crosshairX;
 	INT crosshairY;
 
@@ -25,7 +27,7 @@ public:
 	/*
 	* Reads the team id of the given player from memory of the process
 	*/
-	INT GetTeamOfPlayer(UINT playerAddr);
+	Teams GetTeamOfPlayer(UINT playerAddr);
 
 	/*
 	* Gets the address pointing to the local player (which is the player that you are playing)
@@ -49,20 +51,39 @@ public:
 
 	/*
 	* Checks whether the player that we are reading from is a real player and not something else in memory/game.
-	* If player is NOT real then TRUE is returned, otherwise FALSE.
+	* If player is NOT real then 1 (TRUE) is returned, otherwise 0 (FALSE).
 	*/
-	BOOL DormantCheck(UINT playerAddr);
+	INT DormantCheck(UINT playerAddr);
 
 	/*
-	* // TODO:
-	* Fetch the given player head bone from memory
+	* Retrieves the 4x4 view matrix of the local player from memory
 	*/
-	//Vector3 GetBoneLoc(UINT playerAddr, uint32_t boneId);
+	viewMatrix GetViewMatrix();
 
 	/*
-	* // TODO:
+	* Returns the bone matrix base address
+	*/
+	UINT GetBoneMatrixBaseAddr();
+
+	/*
+	* Fetch the given player head bone vector from memory
+	*/
+	Vector3 GetPlayerBoneLocation(UINT playerAddr, uint32_t boneId);
+
+	/*
+	* Transform an entities 3D position in-game to a 2D position on your screen
+	* e.g. to render something on them (Wallhacks/ESP)
+	* For more info about how W2S works:
+	* - https://guidedhacking.com/threads/so-what-is-a-viewmatrix-anyway-and-how-does-a-w2s-work.10964/?__cf_chl_jschl_tk__=pmd_0dc52b4b4437ca3251053896bca209a151e75bcd-1628027647-0-gqNtZGzNAmKjcnBszQiO
+	*/
+	bool WorldToScreen(const Vector3& origin, Vector2& screen);
+
+	/*
 	* Find the closest enemy to us by calculating distances from us to each other player and retrieve
 	* the closest player that is an enemy, has health and is real. Retrun the player addr of the closest enemy.
 	*/
-	//UINT FindClosestEnemy(uint32_t boneId);
+	UINT FindClosestEnemy(uint32_t boneId);
+
+	INT GetCrosshairX();
+	INT GetCrosshairY();
 };

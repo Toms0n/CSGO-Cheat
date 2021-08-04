@@ -366,7 +366,9 @@ enum HitboxList : int
 // Hardcoded bones (you can make this enum even more wide)
 enum BoneList : int
 {
-	BONE_HEAD = 6,
+	PELVIS = 0,
+	BONE_HEAD = 8,
+	BONE_NECK = 7,
 	BONE_BODY = 80,
 	BONE_L_ARM = 37,
 	BONE_R_ARM = 34,

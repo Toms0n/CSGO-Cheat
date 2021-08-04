@@ -18,7 +18,7 @@ ProcessHandler::~ProcessHandler()
 
 	if (CloseHandle(this->h_Proc))
 	{
-		std::cout << "Sucessfully closed handle: " << this->h_Proc << std::endl;
+		std::cout << "Successfully closed handle: " << this->h_Proc << std::endl;
 	}
 	else
 	{
@@ -133,7 +133,7 @@ MODULEENTRY32 ProcessHandler::GetModule(const std::string& moduleName)
 std::string& ProcessHandler::GetProcessName() { return this->ProcName; }
 HANDLE ProcessHandler::GetProcHandle() { return this->h_Proc; }
 DWORD ProcessHandler::GetProcID() { return this->dw_ProcID; }
-DWORD ProcessHandler::GetClientBase() { std::cout << "Client Base Addr: " << this->ClientBase << std::endl; return this->ClientBase; }
+DWORD ProcessHandler::GetClientBase() { return this->ClientBase; }
 DWORD ProcessHandler::GetClientSize() { return this->ClientSize; }
 DWORD ProcessHandler::GetEngineBase() { return this->EngineBase; }
 DWORD ProcessHandler::GetEngineSize() { return this->EngineSize; }

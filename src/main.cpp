@@ -1,26 +1,13 @@
-#include "CsgoCheatHeader.h"
+#include "CsgoCheatH.h"
 #include "Offsets.h"
+
+//#define NDEBUG // uncomment to disable assert()
 
 uintptr_t closestEnemyIdx; //Used in a thread to save CPU usage.
 
-// this is used only to pass multiple arguments to the CreateThread() function
-struct ThreadArgs
-{
-	HANDLE hProc;
-	uintptr_t modBaseAddress;
-	uint32_t boneId;
-};
-
-void FindClosestEnemyThread(ThreadArgs threadArgs)
-{
-	while (1)
-	{
-		closestEnemyIdx = FindClosestEnemy(threadArgs.hProc, threadArgs.modBaseAddress, threadArgs.boneId);
-	}
-}
-
+//This function is optional for debugging.
 void DrawLine(float StartX, float StartY, float EndX, float EndY, HDC hdc)
-{ //This function is optional for debugging.
+{ 
 	int a, b = 0;
 	HPEN hOPen;
 	HPEN hNPen = CreatePen(PS_SOLID, 2, 0x0000FF /*red*/);
@@ -30,46 +17,69 @@ void DrawLine(float StartX, float StartY, float EndX, float EndY, HDC hdc)
 	DeleteObject(SelectObject(hdc, hOPen));
 }
 
-template<typename T>
-T RPM(HANDLE hProc, SIZE_T address)
-{
-	T buffer;
-	ReadProcessMemory(hProc, (LPCVOID)address, &buffer, sizeof(T), NULL);
-	return buffer;
-}
-
 int main()
 {
-	const auto BONE_USED = HEAD_BONE_ID;
+	HWND hwnd = FindWindowA(NULL, "Counter-Strike: Global Offensive");
+	HDC	hdc = GetDC(hwnd);
+	CsgoAimbot c;
+	INT headBone = BONE_HEAD;
+	INT crosshairX = c.GetCrosshairX();
+	INT crosshairY = c.GetCrosshairY();
 
-	const DWORD PID = AttachProcess(L"csgo.exe");
-	const uintptr_t modBaseAddr = GetModuleBaseAddress(PID, L"client.dll");
+	while (!GetAsyncKeyState(VK_END))
+	{ //press the "end" key to end the hack
+		closestEnemyIdx = c.FindClosestEnemy(headBone);
 
-	if (PID == 0 || modBaseAddr == 0)
-	{
-		return -1;
+		const Vector3 playerBoneWorldPos = c.GetPlayerBoneLocation(closestEnemyIdx, headBone);
+		Vector2 screenPos;
+
+		if (c.WorldToScreen(playerBoneWorldPos, screenPos))
+		{
+			DrawLine(crosshairX, crosshairY, screenPos.x, screenPos.y, hdc); //optinal for debugging
+			if (GetAsyncKeyState(VK_MENU /*alt key*/))
+				SetCursorPos(screenPos.x, screenPos.y); //turn off "raw input" in CSGO settings
+		}
 	}
 
-    HWND hwnd = FindWindowA(NULL, "Counter-Strike: Global Offensive");
-	HDC hdc = GetDC(hwnd);
+	//while (1)
+	//{
+	//	if (GetAsyncKeyState(VK_CAPITAL)) break;
 
-	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, NULL, PID);
-	ThreadArgs* TA = new ThreadArgs{ hProc, modBaseAddr, BONE_USED };
+	//	auto me = c.GetLocalPlayerAddr();
+	//	auto isDormant = c.DormantCheck(me);
+	//	auto myHp = c.GetPlayerHP(me);
+	//	auto myTeam = c.GetTeamOfPlayer(me);
+	//	auto myLoc = c.GetPlayerLocation(me);
+	//	auto vm = c.GetViewMatrix();
 
-	CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)FindClosestEnemyThread, (LPVOID)TA, NULL, NULL);
+	//	std::cout << "IsDormant " << isDormant << std::endl;
+	//	std::cout << "My HP " << myHp << std::endl;
+	//	std::cout << "My Team " << myTeam << std::endl;
+	//	std::cout << "My Loc (" << myLoc.x << "," << myLoc.y << "," << myLoc.z << ")" << std::endl;
 
-	while (!GetAsyncKeyState(VK_END)) //press the "end" key to end the hack
-	{ 
-		const viewMatrix vm = RPM<viewMatrix>(hProc, modBaseAddr + dwViewMatrix);
+	//	/*for (unsigned int i = 0; i < 4; ++i)
+	//	{
+	//		std::cout << "[";
+	//		for (unsigned int j = 0; j < 4; j++)
+	//		{
+	//			if (j == 3)
+	//			{
+	//				std::cout << vm.flMatrix[i][j];
+	//			}
+	//			else
+	//			{
+	//				std::cout << vm.flMatrix[i][j] << ", ";
+	//			}
+	//		}
+	//		std::cout << "]" << std::endl;
+	//	}*/
 
-		Vec3 boneLoc = GetBoneLoc(hProc, GetPlayerAddr(hProc, modBaseAddr, closestEnemyIdx), BONE_USED);
-		Vec3 closestw2shead = WorldToScreen(boneLoc, vm);
+	//	// enumerate all the entities in the entity list
+	//	/*for (unsigned int i = 0; i < 32; ++i)
+	//	{
+	//		auto entList = c.m_Mm->()
+	//	}*/
 
-		DrawLine(CROSSHAIR_X, CROSSHAIR_Y, closestw2shead.x, closestw2shead.y, hdc); //optinal for debugging
-
-		if (GetAsyncKeyState(VK_MENU /*alt key*/) && closestw2shead.z >= 0.001f /*onscreen check*/)
-			SetCursorPos(closestw2shead.x, closestw2shead.y); //turn off "raw input" in CSGO settings
-	}
-
-	delete TA;
+	//	Sleep(5000);
+	//}
 }
