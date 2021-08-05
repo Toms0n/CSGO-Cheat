@@ -51,6 +51,15 @@ struct boneMatrix
 	float z;		// [2][3] entry contains the z coordinate of the bone
 };
 
+enum ClientStates : int
+{
+	IN_LOBBY = 0,
+	LOADING = 1,
+	CONNECTING = 2,
+	CONNECTED = 5,
+	IN_GAME = 6
+};
+
 // Converts a const std::string to const wchar_t*
 //static const wchar_t* StringToWChar(const std::string& str)
 //{

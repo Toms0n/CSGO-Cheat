@@ -10,50 +10,50 @@
 #include "Utils/Enums.h"
 #include "Utils/Utils.h"
 
-class CsgoAimbot
+class CsgoCheats
 {
 private:
 	std::shared_ptr<ProcessHandler> m_Ph;
 	std::unique_ptr<MemoryManager> m_Mm;
 	std::unique_ptr<WinScreenHandler> m_Wsh;
-	std::unique_ptr<CMath> m_Cmath;
+	std::unique_ptr<CMath> m_Cmath; // needed for aimbot
 	INT crosshairX;
 	INT crosshairY;
-
-public:
-	CsgoAimbot();
-	~CsgoAimbot();
 
 	/*
 	* Reads the team id of the given player from memory of the process
 	*/
-	Teams GetTeamOfPlayer(UINT playerAddr);
+	INT GetTeamOfPlayer(DWORD playerAddr);
 
 	/*
 	* Gets the address pointing to the local player (which is the player that you are playing)
 	*/
-	UINT GetLocalPlayerAddr();
+	DWORD GetLocalPlayerAddr();
 
 	/*
 	* Get the address of the player using its index
 	*/
-	UINT GetPlayerAddr(UINT playerIndex);
+	DWORD GetPlayerAddr(INT playerIndex);
 
 	/*
 	* Gets the current health from the player address from whom we want to know the HP of
 	*/
-	INT GetPlayerHP(UINT playerAddr);
+	INT GetPlayerHP(DWORD playerAddr);
 
 	/*
 	* Gets the player current location (as 3d vector) in the game world
 	*/
-	Vector3 GetPlayerLocation(UINT playerAddr);
+	Vector3 GetPlayerLocation(DWORD playerAddr);
 
 	/*
 	* Checks whether the player that we are reading from is a real player and not something else in memory/game.
 	* If player is NOT real then 1 (TRUE) is returned, otherwise 0 (FALSE).
 	*/
-	INT DormantCheck(UINT playerAddr);
+	bool DormantCheck(DWORD playerAddr);
+
+	Vector3 GetLocalPlayerViewAngles();
+
+	bool SetLocalPlayerViewAngles(const Vector3& angles);
 
 	/*
 	* Retrieves the 4x4 view matrix of the local player from memory
@@ -61,14 +61,19 @@ public:
 	viewMatrix GetViewMatrix();
 
 	/*
-	* Returns the bone matrix base address
+	* Returns the bone matrix base address of local player
 	*/
-	UINT GetBoneMatrixBaseAddr();
+	DWORD GetLocalPlayerBoneMatrixBaseAddr();
+
+	/*
+	* Returns the bone matrix base address of entity player
+	*/
+	DWORD GetPlayerBoneMatrixBaseAddr(DWORD playerAddr);
 
 	/*
 	* Fetch the given player head bone vector from memory
 	*/
-	Vector3 GetPlayerBoneLocation(UINT playerAddr, uint32_t boneId);
+	Vector3 GetPlayerBoneLocation(DWORD playerAddr, uint32_t boneId);
 
 	/*
 	* Transform an entities 3D position in-game to a 2D position on your screen
@@ -79,10 +84,60 @@ public:
 	bool WorldToScreen(const Vector3& origin, Vector2& screen);
 
 	/*
+	* The state of the client (e.g. loading, connecting, in-game etc...)
+	*/
+	INT GetClientState();
+
+	/*
+	* Returns an INT. 1 if enemy is spotted, otherwise 0.
+	*/
+	bool GetEnemySpotted(DWORD playerAddr);
+
+	/*
+	* Sets enemies as spotted (used for radar hack)
+	*/
+	void SetEnemySpotted(DWORD playerAddr, bool isSpotted);
+
+	/*
+	* Checks whether the entity is a valid entity (and not e.g. dormant)
+	*/
+	bool IsEntityValid(DWORD playerAddr);
+
+	/*
+	* Checks if player is immune to damage
+	*/
+	bool IsEntityImmune(DWORD playerAddr);
+
+	/*
+	* Check if player is alive
+	*/
+	bool isAlive(DWORD playerAddr);
+
+	/*
 	* Find the closest enemy to us by calculating distances from us to each other player and retrieve
 	* the closest player that is an enemy, has health and is real. Retrun the player addr of the closest enemy.
 	*/
-	UINT FindClosestEnemy(uint32_t boneId);
+	DWORD FindClosestEnemyToCrosshair(uint32_t boneId);
+
+	void FOR_DEBUGGING(DWORD closestEnemy, uint32_t boneId);
+public:
+	CsgoCheats();
+	~CsgoCheats();
+
+	/*
+	* Enables radar hack (shows enemies in the map as red spots)
+	*/
+	void RadarCheat();
+
+	/*
+	* Enables aimbot. boneId is the bone to aim at e.g. HEAD_BONE.
+	*/
+	void AimbotCheat(uint32_t boneId);
+
+	/*
+	* TODO: Makes enemy entities glow through walls
+	*/
+	void GlowWallhackCheat();
 
 	INT GetCrosshairX();
 	INT GetCrosshairY();

@@ -59,7 +59,7 @@ public:
 	BOOL
 	WPM(DWORD dwAddress, T ValueToWrite)
 	{
-		return WriteProcessMemory(m_Ph->GetProcHandle(), reinterpret_cast<LPVOID>(dwAddress), &ValueToWrite, sizeof(T), NULL) == TRUE;
+		return WriteProcessMemory(m_Ph->GetProcHandle(), reinterpret_cast<LPVOID>(dwAddress), &ValueToWrite, sizeof(T), NULL);
 	}
 
 	// Write a value (of type T) to a certain area of process memory of fixed size.
@@ -68,7 +68,7 @@ public:
 	BOOL
 	WriteSize(DWORD dwAddress, T ValueToWrite, size_t Size)
 	{
-		return WriteProcessMemory(m_Ph->GetProcHandle(), reinterpret_cast<LPVOID>(dwAddress), &ValueToWrite, Size, NULL) == TRUE;
+		return WriteProcessMemory(m_Ph->GetProcHandle(), reinterpret_cast<LPVOID>(dwAddress), &ValueToWrite, Size, NULL);
 	}
 
 	// Write an array (of type T) to a certain area of process memory of fixed size.
@@ -77,7 +77,7 @@ public:
 	BOOL
 	WriteArray(DWORD dwAddress, T* ArrayToWrite, size_t ArraySize)
 	{
-		return WriteProcessMemory(m_Ph->GetProcHandle(), reinterpret_cast<LPVOID>(dwAddress), ArrayToWrite, sizeof(T) * ArraySize, NULL) == TRUE;
+		return WriteProcessMemory(m_Ph->GetProcHandle(), reinterpret_cast<LPVOID>(dwAddress), ArrayToWrite, sizeof(T) * ArraySize, NULL);
 	}
 
 	// Try to write a value (of type T) to a certain area of protected process memory.

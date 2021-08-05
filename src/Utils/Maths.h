@@ -325,27 +325,27 @@ public:
 		}
 	}
 
-	float DotProduct( Vector3 &v1, float* v2 )
+	float DotProduct(const Vector3 &v1, const float* v2 )
 	{
 		return v1.x*v2[ 0 ] + v1.y*v2[ 1 ] + v1.z*v2[ 2 ];
 	}
 
-	float Dot( const Vector3 &v1, Vector3 &v2 )
+	float Dot(const Vector3 &v1, const Vector3 &v2)
 	{
 		return v1[ 0 ] * v2[ 0 ] + v1[ 1 ] * v2[ 1 ] + v1[ 2 ] * v2[ 2 ];
 	}
 
-	float VecLength( Vector3& vec )
+	float VecLength(const Vector3& vec)
 	{
 		return FastSQRT( vec.x *  vec.x + vec.y *  vec.y + vec.z *  vec.z );
 	}
 
-	float VecDist( Vector3& fVec1, Vector3& fVec2 )
+	float VecDist(const Vector3& fVec1, const Vector3& fVec2 )
 	{
 		return FastSQRT( pow( fVec1.x - fVec2.x, 2 ) + pow( fVec1.y - fVec2.y, 2 ) + pow( fVec1.z - fVec2.z, 2 ) );
 	}
 
-	float GetFov( Vector3 angle, Vector3 src, Vector3 dst )
+	float GetFov(const Vector3& angle, const Vector3& src, const Vector3& dst )
 	{
 		Vector3 ang, aim;
 		ang = CalcAngle( src, dst );
@@ -358,7 +358,7 @@ public:
 		return RAD2DEG( acos( u_dot_v / ( pow( mag, 2 ) ) ) );
 	}
 
-	Vector3 CalcAngle( Vector3 Source, Vector3 Destination )
+	Vector3 CalcAngle(const Vector3& Source, const Vector3& Destination )
 	{
 		#pragma warning(disable : 4244)
 		Vector3 angles;
@@ -367,9 +367,9 @@ public:
 		delta.y = (Source.y - Destination.y);
 		delta.z = (Source.z - Destination.z);
 
-		double hyp = sqrt(delta.x * delta.x + delta.y * delta.y);
-		angles.x = (float)(atanf(delta.z / hyp) * 57.295779513082f);
-		angles.y = (float)(atanf(delta.y / delta.x) * 57.295779513082f);
+		double hyp = FastSQRT(delta.x * delta.x + delta.y * delta.y);
+		angles.x = (float)(atanf(delta.z / hyp) * M_RADPI);
+		angles.y = (float)(atanf(delta.y / delta.x) * M_RADPI);
 
 		angles.z = 0.0f;
 		if (delta.x >= 0.0) { angles.y += 180.0f; }
@@ -397,19 +397,19 @@ public:
 		while (v.y > 180.f)
 			v.y -= 360.f;
 		while (v.y < -180.f)
-		v.y += 360.f;
+			v.y += 360.f;
 
 		v.z = 0;
 	}
 
-	void SmoothAngle( Vector3& ViewAngle, Vector3& DestAngles, float smooth )
+	void SmoothAngle(const Vector3& ViewAngle, Vector3& DestAngles, float smooth )
 	{
 		Vector3 vecDelta = ViewAngle - DestAngles;
 		NormalizeVector( vecDelta );
 		DestAngles = ViewAngle - vecDelta / 100.0f * smooth;
 	}
 
-	void MakeVector( Vector3 angle, Vector3& vector )
+	void MakeVector(const Vector3& angle, Vector3& vector )
 	{
 		float pitch = float( angle[ 0 ] * M_PI / 180 );
 		float yaw = float( angle[ 1 ] * M_PI / 180 );
