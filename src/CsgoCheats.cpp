@@ -43,6 +43,16 @@ Vector3 CsgoCheats::GetPlayerLocation(DWORD playerAddr)
 	return m_Mm->RPM<Vector3>(playerAddr + netvars::m_vecOrigin);
 }
 
+INT CsgoCheats::GetPlayerGlowIndex(DWORD playerAddr)
+{
+	return m_Mm->RPM<INT>(playerAddr + netvars::m_iGlowIndex);
+}
+
+DWORD CsgoCheats::GetGlowManagerAddr()
+{
+	return m_Mm->RPM<INT>(m_Ph->GetClientBase() + signatures::dwGlowObjectManager);
+}
+
 bool CsgoCheats::DormantCheck(DWORD playerAddr)
 {
 	return m_Mm->RPM<bool>(playerAddr + signatures::m_bDormant);

@@ -58,6 +58,16 @@ private:
 	Vector3 GetPlayerLocation(DWORD playerAddr);
 
 	/*
+	* Get the glow index of the given player with playerAddr
+	*/
+	INT GetPlayerGlowIndex(DWORD playerAddr);
+
+	/*
+	* Gets the glow manager object memory address
+	*/
+	DWORD GetGlowManagerAddr();
+
+	/*
 	* Checks whether the player that we are reading from is a real player and not something else in memory/game.
 	* If player is NOT real then 1 (TRUE) is returned, otherwise 0 (FALSE).
 	*/
