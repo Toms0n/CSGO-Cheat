@@ -360,7 +360,6 @@ public:
 
 	Vector3 CalcAngle(const Vector3& Source, const Vector3& Destination )
 	{
-		#pragma warning(disable : 4244)
 		Vector3 angles;
 		Vector3 delta;
 		delta.x = (Source.x - Destination.x);
@@ -370,8 +369,8 @@ public:
 		double hyp = FastSQRT(delta.x * delta.x + delta.y * delta.y);
 		angles.x = (float)(atanf(delta.z / hyp) * M_RADPI);
 		angles.y = (float)(atanf(delta.y / delta.x) * M_RADPI);
-
 		angles.z = 0.0f;
+
 		if (delta.x >= 0.0) { angles.y += 180.0f; }
 		return angles;
 	}
@@ -386,27 +385,33 @@ public:
 			angles.y += 180.0f;
 	}
 
-	void NormalizeVector( Vector3& v )
+	// normalize vector
+	void ClampAngle( Vector3& v )
 	{
-		if (v.x > 89.0f && v.x <= 180.0f)
+		if(v.x > 89.0f && v.x <= 180.0f)
 			v.x = 89.0f;
-		while (v.x > 180.f)
+		if(v.x > 180.f)
 			v.x -= 360.f;
-		while (v.x < -89.0f)
+		if(v.x < -89.0f)
 			v.x = -89.0f;
-		while (v.y > 180.f)
+		if(v.y > 180.f)
 			v.y -= 360.f;
-		while (v.y < -180.f)
+		if(v.y < -180.f)
 			v.y += 360.f;
 
 		v.z = 0;
 	}
 
-	void SmoothAngle(const Vector3& ViewAngle, Vector3& DestAngles, float smooth )
+	void SmoothAngle(const Vector3& ViewAngle, Vector3& DestAngles, float smooth)
 	{
-		Vector3 vecDelta = ViewAngle - DestAngles;
-		NormalizeVector( vecDelta );
-		DestAngles = ViewAngle - vecDelta / 100.0f * smooth;
+		if (smooth <= 0)
+		{
+			DestAngles = ViewAngle;
+			return;
+		}
+		Vector3 vecDelta = DestAngles - ViewAngle;
+		ClampAngle(vecDelta);
+		DestAngles = ViewAngle + (vecDelta / smooth);
 	}
 
 	void MakeVector(const Vector3& angle, Vector3& vector )
