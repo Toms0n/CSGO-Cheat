@@ -266,16 +266,3 @@ enum Teams : int
 	T,
 	CT
 };
-
-// Current connected state of the user
-//enum SigOnState
-//{
-//	STATE_NONE = 0,
-//	CHALLENGE = 1,
-//	CONNECTED = 2,
-//	NEW = 3,
-//	PRESPAWN = 4,
-//	SPAWN = 5,
-//	FULL_CONNECTED = 6,
-//	CHANGELEVEL = 7
-//};

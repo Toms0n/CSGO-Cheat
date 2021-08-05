@@ -6,6 +6,8 @@
 //#include <iostream>
 //#include <string>
 
+constexpr auto PLAYERS_INDEX_SEPERATION = 0x10; // player pointers in csgo are seperated with 0x10 in the entity list
+
 // Struct definition for an RGBA color
 // Kind of rough, can be improved ofc
 struct RGBA
@@ -59,6 +61,7 @@ enum ClientStates : int
 	CONNECTED = 5,
 	IN_GAME = 6
 };
+
 
 // Converts a const std::string to const wchar_t*
 //static const wchar_t* StringToWChar(const std::string& str)

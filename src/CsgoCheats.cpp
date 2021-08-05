@@ -136,7 +136,7 @@ void CsgoCheats::SetEnemySpotted(DWORD playerAddr, bool isSpotted)
 
 INT CsgoCheats::GetClientState()
 {
-	return m_Mm->RPM<INT>(m_Ph->GetEngineBase() + signatures::dwClientState + signatures::dwClientState_State);
+	return m_Mm->RPM<INT>(clientState + signatures::dwClientState_State);
 }
 
 bool CsgoCheats::IsEntityImmune(DWORD playerAddr)
@@ -211,7 +211,7 @@ void CsgoCheats::RadarCheat()
 	const auto localPlayerAddr = GetLocalPlayerAddr();
 	const auto localPlayerTeam = GetTeamOfPlayer(localPlayerAddr);
 
-	for (unsigned int i = 1; i < 32; i++)
+	for (unsigned int i = 1; i < 64; i++)
 	{
 		const auto playerAddr = GetPlayerAddr(i);
 
@@ -280,7 +280,7 @@ void CsgoCheats::AimbotCheat(uint32_t boneId)
 			// so if the smooth is high, then change of angle to destination angle is less immidiate
 			// and the lower the smooth, the faster it is going from curr aim angles to desination angles
 			// e.g. smooth=1, then there is no smooth and angle is immidiately changed to enemy bone pos
-			m_Cmath->SmoothAngle(currAimAngles, aimAngles, 4);
+			m_Cmath->SmoothAngle(currAimAngles, aimAngles, 1);
 
 			// set destination angles
 			SetLocalPlayerViewAngles(aimAngles);
