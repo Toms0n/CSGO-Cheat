@@ -10,7 +10,7 @@ int main()
 	CsgoCheats c;
 	while (!GetAsyncKeyState(VK_END))
 	{
-		c.AimbotCheat(BONE_HEAD);
+		c.AimbotCheat(BoneList::BONE_HEAD);
 		Sleep(1);
 	}
 }

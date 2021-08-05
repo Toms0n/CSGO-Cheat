@@ -17,6 +17,7 @@ private:
 	std::unique_ptr<MemoryManager> m_Mm;
 	std::unique_ptr<WinScreenHandler> m_Wsh;
 	std::unique_ptr<CMath> m_Cmath; // needed for aimbot
+	DWORD clientState; // needed for view angels
 	INT crosshairX;
 	INT crosshairY;
 
@@ -36,6 +37,17 @@ private:
 	DWORD GetPlayerAddr(INT playerIndex);
 
 	/*
+	* Get the eye position of the given player address and origin vector
+	* of the player in the world
+	*/
+	Vector3 GetPlayerEyePos(DWORD playerAddr, const Vector3& playerOrigin);
+
+	/*
+	* Get the current punch/recoil angles of the localplayer
+	*/
+	Vector3 GetLocalPlayerPunchAngles();
+
+	/*
 	* Gets the current health from the player address from whom we want to know the HP of
 	*/
 	INT GetPlayerHP(DWORD playerAddr);
@@ -51,8 +63,14 @@ private:
 	*/
 	bool DormantCheck(DWORD playerAddr);
 
+	/*
+	* Get the current view angles of the localplayer
+	*/
 	Vector3 GetLocalPlayerViewAngles();
 
+	/*
+	* Set the current view angles of the localplayer to the given angles
+	*/
 	bool SetLocalPlayerViewAngles(const Vector3& angles);
 
 	/*
@@ -119,7 +137,11 @@ private:
 	*/
 	DWORD FindClosestEnemyToCrosshair(uint32_t boneId);
 
+	/*
+	// TODO: delete this
+	*/
 	void FOR_DEBUGGING(DWORD closestEnemy, uint32_t boneId);
+
 public:
 	CsgoCheats();
 	~CsgoCheats();
@@ -138,7 +160,4 @@ public:
 	* TODO: Makes enemy entities glow through walls
 	*/
 	void GlowWallhackCheat();
-
-	INT GetCrosshairX();
-	INT GetCrosshairY();
 };

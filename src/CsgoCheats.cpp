@@ -3,11 +3,12 @@
 
 
 CsgoCheats::CsgoCheats()
-	: 
+	:
 	m_Ph(std::make_shared<ProcessHandler>()),
 	m_Mm(std::make_unique<MemoryManager>(m_Ph)),
 	m_Wsh(std::make_unique<WinScreenHandler>()),
 	m_Cmath(std::make_unique<CMath>()),
+	clientState(m_Mm->RPM<DWORD>(m_Ph->GetEngineBase() + signatures::dwClientState)),
 	crosshairX(m_Wsh->GetScreenWidth() / 2),
 	crosshairY(m_Wsh->GetScreenHeight() / 2)
 {
@@ -49,12 +50,12 @@ bool CsgoCheats::DormantCheck(DWORD playerAddr)
 
 Vector3 CsgoCheats::GetLocalPlayerViewAngles()
 {
-	return m_Mm->RPM<Vector3>(signatures::dwClientState + signatures::dwClientState_ViewAngles);
+	return m_Mm->RPM<Vector3>(clientState + signatures::dwClientState_ViewAngles);
 }
 
 bool CsgoCheats::SetLocalPlayerViewAngles(const Vector3& angles)
 {
-	return m_Mm->WPM<Vector3>(signatures::dwClientState + signatures::dwClientState_ViewAngles, angles);
+	return m_Mm->WPM<Vector3>(clientState + signatures::dwClientState_ViewAngles, angles);
 }
 
 viewMatrix CsgoCheats::GetViewMatrix()
@@ -135,7 +136,7 @@ void CsgoCheats::SetEnemySpotted(DWORD playerAddr, bool isSpotted)
 
 INT CsgoCheats::GetClientState()
 {
-	return m_Mm->RPM<INT>(signatures::dwClientState + signatures::dwClientState_State);
+	return m_Mm->RPM<INT>(m_Ph->GetEngineBase() + signatures::dwClientState + signatures::dwClientState_State);
 }
 
 bool CsgoCheats::IsEntityImmune(DWORD playerAddr)
@@ -169,14 +170,12 @@ bool CsgoCheats::IsEntityValid(DWORD playerAddr)
 	const bool isImmune = IsEntityImmune(playerAddr);
 	if (isImmune) return false;
 
-	//TODO: also check whether the class of given player address is a CSPlayer class ID (ID 34)
-
 	return true;
 }
 
 DWORD CsgoCheats::FindClosestEnemyToCrosshair(uint32_t boneId)
 {
-	DWORD closestEnemyAddr;
+	DWORD closestEnemyAddr = NULL;
 	FLOAT closestEntityDist = FLT_MAX;
 
 	const DWORD localPlayerAddr = GetLocalPlayerAddr();
@@ -217,8 +216,8 @@ void CsgoCheats::RadarCheat()
 		const auto playerAddr = GetPlayerAddr(i);
 
 		// only set enemies as spotted
-		// TODO: only set enemies that are not dormant, and are alive (0 < HP <= 100)
-		if (GetTeamOfPlayer(playerAddr) != localPlayerTeam)
+		if (GetTeamOfPlayer(playerAddr) != localPlayerTeam &&
+			IsEntityValid(playerAddr))
 		{
 			SetEnemySpotted(playerAddr, 1);
 		}
@@ -234,28 +233,56 @@ void CsgoCheats::FOR_DEBUGGING(DWORD closestEnemy, uint32_t boneId)
 	if (WorldToScreen(playerBoneWorldPos, closestPlayerScreenPos))
 	{
 		m_Wsh->DrawLine(crosshairX, crosshairY, closestPlayerScreenPos.x, closestPlayerScreenPos.y); //for debugging
-
-		if (GetAsyncKeyState(VK_MENU /*alt key*/))
-			m_Wsh->MoveMouse(closestPlayerScreenPos, crosshairX, crosshairY);
 	}
+}
+
+Vector3 CsgoCheats::GetLocalPlayerPunchAngles()
+{
+	return m_Mm->RPM<Vector3>(GetLocalPlayerAddr() + netvars::m_aimPunchAngle);
+}
+
+Vector3 CsgoCheats::GetPlayerEyePos(DWORD playerAddr, const Vector3& playerOrigin)
+{
+	return playerOrigin + m_Mm->RPM<Vector3>(playerAddr + netvars::m_vecViewOffset);
 }
 
 void CsgoCheats::AimbotCheat(uint32_t boneId)
 {
+	// TODO: finding closest enemy here in inf. loop in single thread is not efficient
+	// make new thread with only task to find closest enemy and start it first here
 	const DWORD closestEnemyAddr = FindClosestEnemyToCrosshair(boneId);
-	const DWORD localPlayerAddr = GetLocalPlayerAddr();
 
 	if (closestEnemyAddr != NULL)
 	{
-		if (GetAsyncKeyState(VK_RBUTTON)) // ENABLE AIMBOT WHEN RIGHT MOUSE BTN IS PRESSED
+		//FOR_DEBUGGING(closestEnemyAddr, boneId);
+
+		const DWORD localPlayerAddr = GetLocalPlayerAddr();
+
+		/* ENABLE AIMBOT WHEN GIVEN KEY IS PRESSED */
+		if (GetAsyncKeyState(VK_LBUTTON) && GetEnemySpotted(closestEnemyAddr))
 		{
 			const auto localPlayerPos = GetPlayerLocation(localPlayerAddr);
 			const auto enemyPlayerPos = GetPlayerLocation(closestEnemyAddr);
 
-			const Vector3 currAimAngles = GetLocalPlayerViewAngles();
-			Vector3 aimAngles = m_Cmath->CalcAngle(localPlayerPos, enemyPlayerPos);
-			m_Cmath->SmoothAngle(currAimAngles, aimAngles, 20); // smooth the aim angles
+			const auto localPlayerEyePos = GetPlayerEyePos(localPlayerAddr, localPlayerPos);
+			const auto enemyHeadPos = GetPlayerBoneLocation(closestEnemyAddr, boneId);
 
+			const Vector3 currAimAngles = GetLocalPlayerViewAngles();
+			Vector3 aimAngles = m_Cmath->CalcAngle(localPlayerEyePos, enemyHeadPos);
+
+			// remove recoil
+			aimAngles -= GetLocalPlayerPunchAngles() * 2.f;
+
+			// 1) Get delta of current aim angle to destination
+			// 2) Clamp/normalize delta vector to not be detected by VAC 
+			// and avoid aim flicks to unexpected places in the world
+			// 3) apply linear smoothing to the clamped angle to not be obvious with aim
+			// so if the smooth is high, then change of angle to destination angle is less immidiate
+			// and the lower the smooth, the faster it is going from curr aim angles to desination angles
+			// e.g. smooth=1, then there is no smooth and angle is immidiately changed to enemy bone pos
+			m_Cmath->SmoothAngle(currAimAngles, aimAngles, 4);
+
+			// set destination angles
 			SetLocalPlayerViewAngles(aimAngles);
 		}
 	}
@@ -265,9 +292,6 @@ void CsgoCheats::GlowWallhackCheat()
 {
 	// TODO:
 }
-
-INT CsgoCheats::GetCrosshairX() { return crosshairX; }
-INT CsgoCheats::GetCrosshairY() { return crosshairY; }
 
 
 
