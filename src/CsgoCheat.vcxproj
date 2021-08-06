@@ -147,10 +147,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CsgoCheats.h" />
-    <ClInclude Include="WinScreenHandlerH.h" />
-    <ClInclude Include="MemoryManagerH.h" />
+    <ClInclude Include="WinScreenHandler.h" />
+    <ClInclude Include="MemoryManager.h" />
     <ClInclude Include="Offsets.h" />
-    <ClInclude Include="ProcessHandlerH.h" />
+    <ClInclude Include="ProcessHandler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

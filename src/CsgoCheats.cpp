@@ -3,59 +3,65 @@
 
 
 CsgoCheats::CsgoCheats(
-	std::shared_ptr<ProcessHandler> _Ph,
-	std::shared_ptr<MemoryManager> _Mm,
-	std::shared_ptr<WinScreenHandler> _Wsh,
-	std::shared_ptr<CMath> _Cm
+	const std::shared_ptr<ProcessHandler> _Ph,
+	const std::shared_ptr<MemoryManager> _Mm,
+	const std::shared_ptr<WinScreenHandler> _Wsh,
+	const std::shared_ptr<CMath> _Cm
 )
 	:
 	m_Ph(_Ph),
 	m_Mm(_Mm),
 	m_Wsh(_Wsh),
-	m_Cmath(_Cm)
+	m_Cmath(_Cm),
+	clientStateAddr(
+		m_Mm->RPM<DWORD>(m_Ph->GetEngineBase() + signatures::dwClientState)
+	),
+	glowObjectManagerAddr(
+		m_Mm->RPM<DWORD>(m_Ph->GetClientBase() + signatures::dwGlowObjectManager)
+	),
+	crosshairX(m_Wsh->GetScreenWidth() / 2),
+	crosshairY(m_Wsh->GetScreenHeight() / 2)
 {
-	clientStateAddr = m_Mm->RPM<DWORD>(m_Ph->GetEngineBase() + signatures::dwClientState);
-	glowObjectManagerAddr = m_Mm->RPM<DWORD>(m_Ph->GetClientBase() + signatures::dwGlowObjectManager);
-	crosshairX = m_Wsh->GetScreenWidth() / 2;
-	crosshairY = m_Wsh->GetScreenHeight() / 2;
 }
 
 CsgoCheats::~CsgoCheats()
 {
+#ifdef _DEBUG
 	std::cout << "~CsgoCheats() Called!" << std::endl;
+#endif
 }
 
-INT CsgoCheats::GetTeamOfPlayer(DWORD playerAddr)
+inline INT CsgoCheats::GetTeamOfPlayer(const DWORD playerAddr)
 {
 	return m_Mm->RPM<INT>(playerAddr + netvars::m_iTeamNum);
 }
 
-DWORD CsgoCheats::GetLocalPlayerAddr()
+inline DWORD CsgoCheats::GetLocalPlayerAddr()
 {
 	return m_Mm->RPM<DWORD>(m_Ph->GetClientBase() + signatures::dwLocalPlayer);
 }
 
-DWORD CsgoCheats::GetPlayerAddr(INT playerIndex)
+inline DWORD CsgoCheats::GetPlayerAddr(const INT playerIndex)
 {
 	return m_Mm->RPM<DWORD>(m_Ph->GetClientBase() + signatures::dwEntityList + (playerIndex * PLAYERS_INDEX_SEPERATION));
 }
 
-INT CsgoCheats::GetPlayerHP(DWORD playerAddr)
+inline INT CsgoCheats::GetPlayerHP(const DWORD playerAddr)
 {
 	return m_Mm->RPM<INT>(playerAddr + netvars::m_iHealth);
 }
 
-Vector3 CsgoCheats::GetPlayerLocation(DWORD playerAddr)
+inline Vector3 CsgoCheats::GetPlayerLocation(const DWORD playerAddr)
 {
 	return m_Mm->RPM<Vector3>(playerAddr + netvars::m_vecOrigin);
 }
 
-INT CsgoCheats::GetPlayerGlowIndex(DWORD playerAddr)
+inline INT CsgoCheats::GetPlayerGlowIndex(const DWORD playerAddr)
 {
 	return m_Mm->RPM<INT>(playerAddr + netvars::m_iGlowIndex);
 }
 
-GlowStruct CsgoCheats::GetPlayerGlow(const INT glowIdx)
+inline GlowStruct CsgoCheats::GetPlayerGlow(const INT glowIdx)
 {
 	return m_Mm->RPM<GlowStruct>(
 		glowObjectManagerAddr + 
@@ -64,7 +70,7 @@ GlowStruct CsgoCheats::GetPlayerGlow(const INT glowIdx)
 	);
 }
 
-bool CsgoCheats::SetPlayerGlow(const INT glowIdx)
+inline bool CsgoCheats::SetPlayerGlow(const INT glowIdx)
 {
 	auto g = GetPlayerGlow(glowIdx);
 	g.rbga.r = 1.f;
@@ -80,37 +86,37 @@ bool CsgoCheats::SetPlayerGlow(const INT glowIdx)
 	);
 }
 
-bool CsgoCheats::DormantCheck(DWORD playerAddr)
+inline bool CsgoCheats::DormantCheck(const DWORD playerAddr)
 {
 	return m_Mm->RPM<bool>(playerAddr + signatures::m_bDormant);
 }
 
-Vector3 CsgoCheats::GetLocalPlayerViewAngles()
+inline Vector3 CsgoCheats::GetLocalPlayerViewAngles()
 {
 	return m_Mm->RPM<Vector3>(clientStateAddr + signatures::dwClientState_ViewAngles);
 }
 
-bool CsgoCheats::SetLocalPlayerViewAngles(const Vector3& angles)
+inline bool CsgoCheats::SetLocalPlayerViewAngles(const Vector3& angles)
 {
 	return m_Mm->WPM<Vector3>(clientStateAddr + signatures::dwClientState_ViewAngles, angles);
 }
 
-viewMatrix CsgoCheats::GetViewMatrix()
+inline viewMatrix CsgoCheats::GetViewMatrix()
 {
 	return m_Mm->RPM<viewMatrix>(m_Ph->GetClientBase() + signatures::dwViewMatrix);
 }
 
-DWORD CsgoCheats::GetLocalPlayerBoneMatrixBaseAddr()
+inline DWORD CsgoCheats::GetLocalPlayerBoneMatrixBaseAddr()
 {
 	return m_Mm->RPM<UINT>(m_Ph->GetClientBase() + netvars::m_dwBoneMatrix);
 }
 
-DWORD CsgoCheats::GetPlayerBoneMatrixBaseAddr(DWORD playerAddr)
+inline DWORD CsgoCheats::GetPlayerBoneMatrixBaseAddr(const DWORD playerAddr)
 {
 	return m_Mm->RPM<UINT>(playerAddr + netvars::m_dwBoneMatrix);
 }
 
-Vector3 CsgoCheats::GetPlayerBoneLocation(DWORD playerAddr, uint32_t boneId)
+inline Vector3 CsgoCheats::GetPlayerBoneLocation(const DWORD playerAddr, const uint32_t boneId)
 {
 	const UINT baseBoneMatAddr = GetPlayerBoneMatrixBaseAddr(playerAddr);
 	const boneMatrix boneMat =
@@ -118,7 +124,7 @@ Vector3 CsgoCheats::GetPlayerBoneLocation(DWORD playerAddr, uint32_t boneId)
 	return Vector3(boneMat.x, boneMat.y, boneMat.z);
 }
 
-bool CsgoCheats::WorldToScreen(const Vector3& worldPosVec, Vector2& screen)
+inline bool CsgoCheats::WorldToScreen(const Vector3& worldPosVec, Vector2& screen)
 {
 	const viewMatrix& w2sMatrix = GetViewMatrix();
 
@@ -149,39 +155,34 @@ bool CsgoCheats::WorldToScreen(const Vector3& worldPosVec, Vector2& screen)
 	screen.x /= W;
 	screen.y /= W;
 
-	// get the screen width and height
-	const auto screenW = m_Wsh->GetScreenWidth();
-	const auto screenH = m_Wsh->GetScreenHeight();
-
 	// final, real screen positions
-	// TODO: this can be optimized by reducing amount of calculations
-	screen.x = (screenW / 2 * screen.x) + (screen.x + screenW / 2);
-	screen.y = -(screenH / 2 * screen.y) + (screen.y + screenH / 2);
+	screen.x = (crosshairX * screen.x) + (screen.x + crosshairX);
+	screen.y = -(crosshairY * screen.y) + (screen.y + crosshairY);
 
 	return true;
 }
 
-bool CsgoCheats::GetEnemySpotted(DWORD playerAddr)
+inline bool CsgoCheats::GetEnemySpotted(const DWORD playerAddr)
 {
 	return m_Mm->RPM<bool>(playerAddr + netvars::m_bSpotted);
 }
 
-void CsgoCheats::SetEnemySpotted(DWORD playerAddr, bool isSpotted)
+inline void CsgoCheats::SetEnemySpotted(const DWORD playerAddr, const bool isSpotted)
 {
 	m_Mm->WPM(playerAddr + netvars::m_bSpotted, isSpotted);
 }
 
-INT CsgoCheats::GetClientState()
+inline INT CsgoCheats::GetClientState()
 {
 	return m_Mm->RPM<INT>(clientStateAddr + signatures::dwClientState_State);
 }
 
-bool CsgoCheats::IsEntityImmune(DWORD playerAddr)
+inline bool CsgoCheats::IsEntityImmune(const DWORD playerAddr)
 {
 	return m_Mm->RPM<bool>(playerAddr + netvars::m_bGunGameImmunity);
 }
 
-bool CsgoCheats::isAlive(DWORD playerAddr)
+inline bool CsgoCheats::isAlive(const DWORD playerAddr)
 {
 	const INT entHp = GetPlayerHP(playerAddr);
 	if (entHp > 0 && entHp <= 100)
@@ -189,7 +190,7 @@ bool CsgoCheats::isAlive(DWORD playerAddr)
 	return false;
 }
 
-bool CsgoCheats::IsEntityValid(DWORD playerAddr)
+inline bool CsgoCheats::IsEntityValid(const DWORD playerAddr)
 {
 	// check if player has a valid team
 	const INT entTeam = GetTeamOfPlayer(playerAddr);
@@ -210,7 +211,7 @@ bool CsgoCheats::IsEntityValid(DWORD playerAddr)
 	return true;
 }
 
-DWORD CsgoCheats::FindClosestEnemyToCrosshair(uint32_t boneId)
+inline DWORD CsgoCheats::FindClosestEnemyToCrosshair(const uint32_t boneId)
 {
 	DWORD closestEnemyAddr = NULL;
 	FLOAT closestEntityDist = FLT_MAX;
@@ -243,6 +244,7 @@ DWORD CsgoCheats::FindClosestEnemyToCrosshair(uint32_t boneId)
 	return closestEnemyAddr;
 }
 
+#ifdef _DEBUG
 void CsgoCheats::FOR_DEBUGGING(DWORD closestEnemy, uint32_t boneId)
 {
 	const Vector3 playerBoneWorldPos = GetPlayerBoneLocation(closestEnemy, boneId);
@@ -253,13 +255,14 @@ void CsgoCheats::FOR_DEBUGGING(DWORD closestEnemy, uint32_t boneId)
 		m_Wsh->DrawLine(crosshairX, crosshairY, closestPlayerScreenPos.x, closestPlayerScreenPos.y); //for debugging
 	}
 }
+#endif
 
-Vector3 CsgoCheats::GetLocalPlayerPunchAngles()
+inline Vector3 CsgoCheats::GetLocalPlayerPunchAngles()
 {
 	return m_Mm->RPM<Vector3>(GetLocalPlayerAddr() + netvars::m_aimPunchAngle);
 }
 
-Vector3 CsgoCheats::GetPlayerEyePos(DWORD playerAddr, const Vector3& playerOrigin)
+inline Vector3 CsgoCheats::GetPlayerEyePos(const DWORD playerAddr, const Vector3& playerOrigin)
 {
 	return playerOrigin + m_Mm->RPM<Vector3>(playerAddr + netvars::m_vecViewOffset);
 }
@@ -291,7 +294,9 @@ void CsgoCheats::AimbotCheat(const uint32_t boneId)
 	
 	if (closestEnemyAddr != NULL)
 	{
+#ifdef _DEBUG
 		FOR_DEBUGGING(closestEnemyAddr, boneId);
+#endif
 		const DWORD localPlayerAddr = GetLocalPlayerAddr();
 
 		/* ENABLE AIMBOT WHEN GIVEN KEY IS PRESSED */

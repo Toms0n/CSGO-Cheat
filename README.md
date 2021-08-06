@@ -11,4 +11,5 @@
 2. Prevent using `64` as in the loops and store only enemies in a `std::vector` for example and loop through it. Also check whether max players can be fetched from memory.  
 2. **IMPORTANT TODO:** Aimbot sometimes flicks to enemy without me pressing the left button of the mouse. Uncommenting isSpotted() check in aimbot fixes this, but slows down the aimbot AFAIK.  
 3. Remove unnecessary code from e.g. Maths.h (as many implementation are not needed for external cheat).  
-4. Make glow depending on health of enemy (going from green color to yellow to red upon damaging the enemy).
+4. Make glow depending on health of enemy (going from green color to yellow to red upon damaging the enemy).  
+5. Make all functions in `CsgoCheats` class `const`. So like this `DWORD getPlayer(...) *const*`.

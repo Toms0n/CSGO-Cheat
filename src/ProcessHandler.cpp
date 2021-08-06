@@ -1,25 +1,33 @@
-#include "ProcessHandlerH.h"
+#include "ProcessHandler.h"
 
-ProcessHandler::ProcessHandler()
+ProcessHandler::ProcessHandler(const std::string& processName)
 	:
-	h_Proc(nullptr)
+	ProcName(processName),
+	hProc(nullptr),
+	dwProcID(0),
+	dwClientBase(0),
+	dwClientSize(0),
+	dwEngineBase(0),
+	dwEngineSize(0),
+	structClientDLL{},
+	structEngineDLL{}
 {
 }
 
 ProcessHandler::~ProcessHandler()
 {
-	const auto closedStatus = CloseHandle(this->h_Proc);
+	const auto closedStatus = CloseHandle(this->hProc);
 	
 	assert(closedStatus); // the handle should be active to be able to close it
 
 #ifdef _DEBUG
 	if (closedStatus)
 	{
-		std::cout << "Successfully closed handle: " << this->h_Proc << std::endl;
+		std::cout << "Successfully closed handle: " << this->hProc << std::endl;
 	}
 	else
 	{
-		std::cout << "Failed to close handle: " << this->h_Proc << std::endl;
+		std::cout << "Failed to close handle: " << this->hProc << std::endl;
 	}
 #endif
 }
@@ -27,23 +35,23 @@ ProcessHandler::~ProcessHandler()
 BOOL ProcessHandler::Init()
 {
 	// Attach to the process.
-	if (!AttachProcess("csgo.exe")) return FALSE;
+	if (!AttachProcess()) return FALSE;
 
 	// Get the required modules of CS:GO for accessing/writing in memory later on.
-	ClientDLL = GetModule("client.dll");
-	EngineDLL = GetModule("engine.dll");
-	if (ClientDLL.modBaseAddr == 0x0 || EngineDLL.modBaseAddr == 0x0) return FALSE;
+	structClientDLL = GetModule("client.dll");
+	structEngineDLL = GetModule("engine.dll");
+	if (structClientDLL.modBaseAddr == 0x0 || structEngineDLL.modBaseAddr == 0x0) return FALSE;
 
 	// Store base addresses and size of all the required modules.
-	ClientBase = reinterpret_cast<DWORD>(ClientDLL.modBaseAddr);
-	EngineBase = reinterpret_cast<DWORD>(EngineDLL.modBaseAddr);
-	ClientSize = ClientDLL.modBaseSize;
-	EngineSize = EngineDLL.modBaseSize;
+	dwClientBase = reinterpret_cast<DWORD>(structClientDLL.modBaseAddr);
+	dwEngineBase = reinterpret_cast<DWORD>(structEngineDLL.modBaseAddr);
+	dwClientSize = structClientDLL.modBaseSize;
+	dwEngineSize = structEngineDLL.modBaseSize;
 
 	return TRUE;
 }
 
-BOOL ProcessHandler::AttachProcess(const std::string& proc_name)
+BOOL ProcessHandler::AttachProcess()
 {
 	// Take a snapshot of all processes in the system.
 	auto hProcSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -59,7 +67,7 @@ BOOL ProcessHandler::AttachProcess(const std::string& proc_name)
 		procEnt.dwSize = sizeof(procEnt);
 
 		// convert string to wstring and then to wchar for comparison
-		const auto widestr = std::wstring(proc_name.begin(), proc_name.end());
+		const auto widestr = std::wstring(ProcName.begin(), ProcName.end());
 		const wchar_t* w_procname = widestr.c_str();
 
 		// Now walk the snapshot of processes, and
@@ -70,9 +78,9 @@ BOOL ProcessHandler::AttachProcess(const std::string& proc_name)
 			{
 				std::cout << "Process found: " << procEnt.szExeFile << " PID: " << procEnt.th32ProcessID << std::endl;
 
-				this->dw_ProcID = procEnt.th32ProcessID;
-				this->h_Proc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, this->dw_ProcID);
-				this->ProcName = proc_name;
+				this->dwProcID = procEnt.th32ProcessID;
+				this->hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, this->dwProcID);
+				this->ProcName = ProcName;
 
 				CloseHandle(hProcSnap);
 				return TRUE;
@@ -84,7 +92,7 @@ BOOL ProcessHandler::AttachProcess(const std::string& proc_name)
 		std::cout << "Could not get snapshot of all running processes." << std::endl;
 	}
 
-	std::cout << "Process " << proc_name << " could not be found in the process list" << std::endl;
+	std::cout << "Process " << ProcName << " could not be found in the process list" << std::endl;
 
 	CloseHandle(hProcSnap);
 	return FALSE;
@@ -92,9 +100,9 @@ BOOL ProcessHandler::AttachProcess(const std::string& proc_name)
 
 MODULEENTRY32 ProcessHandler::GetModule(const std::string& moduleName)
 {
-	assert(this->dw_ProcID && this->h_Proc); // Get module info only when there is an attached process.
+	assert(this->dwProcID && this->hProc); // Get module info only when there is an attached process.
 
-	auto hModulesSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, this->dw_ProcID);
+	auto hModulesSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, this->dwProcID);
 
 	MODULEENTRY32 modEnt;
 	modEnt.dwSize = sizeof(modEnt);
@@ -129,11 +137,11 @@ MODULEENTRY32 ProcessHandler::GetModule(const std::string& moduleName)
 
 // Getters
 std::string& ProcessHandler::GetProcessName() { return this->ProcName; }
-HANDLE ProcessHandler::GetProcHandle() { return this->h_Proc; }
-DWORD ProcessHandler::GetProcID() { return this->dw_ProcID; }
-DWORD ProcessHandler::GetClientBase() { return this->ClientBase; }
-DWORD ProcessHandler::GetClientSize() { return this->ClientSize; }
-DWORD ProcessHandler::GetEngineBase() { return this->EngineBase; }
-DWORD ProcessHandler::GetEngineSize() { return this->EngineSize; }
-MODULEENTRY32 ProcessHandler::GetClient() { return this->ClientDLL; }
-MODULEENTRY32 ProcessHandler::GetEngine() { return this->EngineDLL; }
+HANDLE ProcessHandler::GetProcHandle() { return this->hProc; }
+DWORD ProcessHandler::GetProcID() { return this->dwProcID; }
+DWORD ProcessHandler::GetClientBase() { return this->dwClientBase; }
+DWORD ProcessHandler::GetClientSize() { return this->dwClientSize; }
+DWORD ProcessHandler::GetEngineBase() { return this->dwEngineBase; }
+DWORD ProcessHandler::GetEngineSize() { return this->dwEngineSize; }
+MODULEENTRY32 ProcessHandler::GetClient() { return this->structClientDLL; }
+MODULEENTRY32 ProcessHandler::GetEngine() { return this->structEngineDLL; }

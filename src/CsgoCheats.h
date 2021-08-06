@@ -3,9 +3,9 @@
 #include <iostream>
 #include <windows.h>
 #include <tlHelp32.h>
-#include "MemoryManagerH.h"
-#include "WinScreenHandlerH.h"
-#include "ProcessHandlerH.h"
+#include "MemoryManager.h"
+#include "WinScreenHandler.h"
+#include "ProcessHandler.h"
 #include "Utils/Maths.h"
 #include "Utils/Enums.h"
 #include "Utils/Utils.h"
@@ -30,18 +30,18 @@ private:
 	/*
 	* Get the address of the player using its index
 	*/
-	DWORD GetPlayerAddr(INT playerIndex);
+	DWORD GetPlayerAddr(const INT playerIndex);
 
 	/*
 	* Reads the team id of the given player from memory of the process
 	*/
-	INT GetTeamOfPlayer(DWORD playerAddr);
+	INT GetTeamOfPlayer(const DWORD playerAddr);
 
 	/*
 	* Get the eye position of the given player address and origin vector
 	* of the player in the world
 	*/
-	Vector3 GetPlayerEyePos(DWORD playerAddr, const Vector3& playerOrigin);
+	Vector3 GetPlayerEyePos(const DWORD playerAddr, const Vector3& playerOrigin);
 
 	/*
 	* Get the current punch/recoil angles of the localplayer
@@ -51,17 +51,17 @@ private:
 	/*
 	* Gets the current health from the player address from whom we want to know the HP of
 	*/
-	INT GetPlayerHP(DWORD playerAddr);
+	INT GetPlayerHP(const DWORD playerAddr);
 
 	/*
 	* Gets the player current location (as 3d vector) in the game world
 	*/
-	Vector3 GetPlayerLocation(DWORD playerAddr);
+	Vector3 GetPlayerLocation(const DWORD playerAddr);
 
 	/*
 	* Get the glow index of the given player with playerAddr
 	*/
-	INT GetPlayerGlowIndex(DWORD playerAddr);
+	INT GetPlayerGlowIndex(const DWORD playerAddr);
 
 	/*
 	* Sets the glow of the a player with given glowIdx to some preferred color
@@ -71,13 +71,13 @@ private:
 	/*
 	* Gets the GlowStruct from memory of a player glowIdx
 	*/
-	inline GlowStruct GetPlayerGlow(const INT glowIdx);
+	GlowStruct GetPlayerGlow(const INT glowIdx);
 
 	/*
 	* Checks whether the player that we are reading from is a real player and not something else in memory/game.
 	* If player is NOT real then 1 (TRUE) is returned, otherwise 0 (FALSE).
 	*/
-	bool DormantCheck(DWORD playerAddr);
+	bool DormantCheck(const DWORD playerAddr);
 
 	/*
 	* Get the current view angles of the localplayer
@@ -102,12 +102,12 @@ private:
 	/*
 	* Returns the bone matrix base address of entity player
 	*/
-	DWORD GetPlayerBoneMatrixBaseAddr(DWORD playerAddr);
+	DWORD GetPlayerBoneMatrixBaseAddr(const DWORD playerAddr);
 
 	/*
 	* Fetch the given player head bone vector from memory
 	*/
-	Vector3 GetPlayerBoneLocation(DWORD playerAddr, uint32_t boneId);
+	Vector3 GetPlayerBoneLocation(const DWORD playerAddr, const uint32_t boneId);
 
 	/*
 	* Transform an entities 3D position in-game to a 2D position on your screen
@@ -125,33 +125,33 @@ private:
 	/*
 	* Returns an INT. 1 if enemy is spotted, otherwise 0.
 	*/
-	bool GetEnemySpotted(DWORD playerAddr);
+	bool GetEnemySpotted(const DWORD playerAddr);
 
 	/*
 	* Sets enemies as spotted (used for radar hack)
 	*/
-	void SetEnemySpotted(DWORD playerAddr, bool isSpotted);
+	void SetEnemySpotted(const DWORD playerAddr, bool isSpotted);
 
 	/*
 	* Checks whether the entity is a valid entity (and not e.g. dormant)
 	*/
-	bool IsEntityValid(DWORD playerAddr);
+	bool IsEntityValid(const DWORD playerAddr);
 
 	/*
 	* Checks if player is immune to damage
 	*/
-	bool IsEntityImmune(DWORD playerAddr);
+	bool IsEntityImmune(const DWORD playerAddr);
 
 	/*
 	* Check if player is alive
 	*/
-	bool isAlive(DWORD playerAddr);
+	bool isAlive(const DWORD playerAddr);
 
 	/*
 	* Find the closest enemy to us by calculating distances from us to each other player and retrieve
 	* the closest player that is an enemy, has health and is real. Retrun the player addr of the closest enemy.
 	*/
-	DWORD FindClosestEnemyToCrosshair(uint32_t boneId);
+	DWORD FindClosestEnemyToCrosshair(const uint32_t boneId);
 
 #ifdef _DEBUG
 	/*
@@ -164,15 +164,15 @@ public:
 	// Delete all default implicit constructors that the compiler defines.
 	CsgoCheats() = delete;
 	CsgoCheats(CsgoCheats const&) = delete;
-	CsgoCheats& operator = (CsgoCheats const&) = delete;
+	CsgoCheats& operator=(CsgoCheats const&) = delete;
 	CsgoCheats(CsgoCheats&&) = delete;
-	CsgoCheats& operator = (CsgoCheats&&) = delete;
+	CsgoCheats& operator=(CsgoCheats&&) = delete;
 
 	explicit CsgoCheats(
-		std::shared_ptr<ProcessHandler> _Ph,
-		std::shared_ptr<MemoryManager> _Mm,
-		std::shared_ptr<WinScreenHandler> _Wsh,
-		std::shared_ptr<CMath> _Cm
+		const std::shared_ptr<ProcessHandler> _Ph,
+		const std::shared_ptr<MemoryManager> _Mm,
+		const std::shared_ptr<WinScreenHandler> _Wsh,
+		const std::shared_ptr<CMath> _Cm
 	);
 
 	~CsgoCheats();

@@ -27,7 +27,7 @@ void GlowESP(std::shared_ptr<CsgoCheats> cc)
 		while (!GetAsyncKeyState(VK_NUMPAD2))
 		{
 			cc->GlowWallhackCheat();
-			Sleep(5);
+			Sleep(10);
 		}
 	}
 }
@@ -47,7 +47,7 @@ void Radar(std::shared_ptr<CsgoCheats> cc)
 int main()
 {
 	// Initing and checking initialization of instances before starting the cheat
-	std::shared_ptr<ProcessHandler> ph = std::make_shared<ProcessHandler>();
+	std::shared_ptr<ProcessHandler> ph = std::make_shared<ProcessHandler>("csgo.exe");
 	if (ph->Init())
 	{
 		std::cout << "Successfully initialized ProcessHandler" << std::endl;
@@ -81,10 +81,10 @@ int main()
 	// Init and start threads for the cheats
 	std::thread aimbot(Aimbot, c);
 	std::thread glow(GlowESP, c);
-	std::thread radar(Radar, c);
+	//std::thread radar(Radar, c);
 	
 	// Wait for each thread to terminate by joining threads
-	aimbot.join();
 	glow.join();
-	radar.join();
+	aimbot.join();
+	//radar.join();
 }

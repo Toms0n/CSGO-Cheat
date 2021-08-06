@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProcessHandlerH.h"
+#include "ProcessHandler.h"
 #include <iostream>
 #include <memory>
 #include <windows.h>
@@ -12,6 +12,12 @@ private:
 	std::shared_ptr<ProcessHandler> m_Ph;
 
 public:
+	MemoryManager() = delete;
+	MemoryManager(MemoryManager const&) = delete;
+	MemoryManager& operator=(MemoryManager const&) = delete;
+	MemoryManager(MemoryManager&&) = delete;
+	MemoryManager& operator=(MemoryManager&&) = delete;
+
 	MemoryManager(std::shared_ptr<ProcessHandler> processHandlerPtr);
 	~MemoryManager();
 
@@ -57,7 +63,7 @@ public:
 	// Returns: True if the writing is successful.
 	template <typename T>
 	BOOL
-	WPM(DWORD dwAddress, T ValueToWrite)
+	WPM(DWORD dwAddress, const T& ValueToWrite)
 	{
 		return WriteProcessMemory(m_Ph->GetProcHandle(), reinterpret_cast<LPVOID>(dwAddress), &ValueToWrite, sizeof(T), NULL);
 	}

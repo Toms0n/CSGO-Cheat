@@ -1,6 +1,11 @@
-#include "WinScreenHandlerH.h"
+#include "WinScreenHandler.h"
 
 WinScreenHandler::WinScreenHandler()
+	:
+	hWindow(nullptr),
+	hDeviceContext(nullptr),
+	screenWidth(0),
+	screenHeight(0)
 {
 }
 
@@ -40,6 +45,7 @@ uint32_t WinScreenHandler::GetScreenWidth()
 	return screenWidth;
 }
 
+#ifdef _DEBUG
 void WinScreenHandler::DrawLine(float StartX, float StartY, float EndX, float EndY)
 {
 	// TODO: this method is inefficient since each object is created and destroyed each time
@@ -52,3 +58,4 @@ void WinScreenHandler::DrawLine(float StartX, float StartY, float EndX, float En
 	a = LineTo(this->hDeviceContext, EndX, EndY); //end of line
 	DeleteObject(SelectObject(this->hDeviceContext, hOPen));
 }
+#endif

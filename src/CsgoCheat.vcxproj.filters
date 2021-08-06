@@ -8,10 +8,10 @@
     <ClCompile Include="CsgoCheats.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="WinScreenHandlerH.h" />
-    <ClInclude Include="MemoryManagerH.h" />
     <ClInclude Include="Offsets.h" />
-    <ClInclude Include="ProcessHandlerH.h" />
     <ClInclude Include="CsgoCheats.h" />
+    <ClInclude Include="MemoryManager.h" />
+    <ClInclude Include="ProcessHandler.h" />
+    <ClInclude Include="WinScreenHandler.h" />
   </ItemGroup>
 </Project>

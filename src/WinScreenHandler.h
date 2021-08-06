@@ -7,10 +7,10 @@
 class WinScreenHandler
 {
 private:
-	uint32_t screenWidth;
-	uint32_t screenHeight;
 	HWND hWindow;
 	HDC hDeviceContext;
+	uint32_t screenWidth;
+	uint32_t screenHeight;
 
 public:
 	WinScreenHandler();
