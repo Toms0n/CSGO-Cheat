@@ -25,7 +25,6 @@ private:
 
 public:
 
-	// Calls Init() to initialize the ProcessHandler.
 	ProcessHandler();
 
 	// Close the HANDLE of the object.

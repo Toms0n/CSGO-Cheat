@@ -1,36 +1,32 @@
-/// Utils.h
 // This header defines several non-namespaced methods and structs that can help in making the cheat
-
 #pragma once
 
-//#include <iostream>
-//#include <string>
-
 constexpr auto PLAYERS_INDEX_SEPERATION = 0x10; // player pointers in csgo are seperated with 0x10 in the entity list
+constexpr auto GLOW_IDX_SEPERATION = 0x38; // space between each glow index of player
+constexpr auto GLOW_VALUES_OFFSET = 0x8; // offset to skip first 8 byts (that could crash the game if it is being written to)
 
 // Struct definition for an RGBA color
-// Kind of rough, can be improved ofc
 struct RGBA
 {
 	float r, g, b, a;
 };
 
-// Struct definition for a glow object
-struct GlowObject
+struct GlowStruct
 {
-	DWORD pEntity;
-	RGBA rbga;
-	/*float r;
-	float g;
-	float b;
-	float a;*/
-	uint8_t unk1[16];
-	bool RenderWhenOccluded;
-	bool RenderWhenUnoccluded;
-	bool FullBloom;
-	uint8_t unk2[14];
+	//int m_nNextFreeSlot;
+	//DWORD pEnt;
+	RGBA rbga; // RGB values with alpha as A
+	//bool m_bGlowAlphaCappedByRenderAlpha;
+	//float m_flGlowAlphaFunctionOfMaxVelocity;
+	//float m_flGlowAlphaMax;
+	//float m_flGlowPulseOverdrive;
+	uint8_t unknown1[16];
+	bool renderOccluded;
+	bool renderUnoccluded;
+	bool fullBloom;
+	//uint8_t unknown2[5];
+	//int glowStyle;
 };
-
 
 // Struct definition for the WorldToScreenMatrix 4x4
 // Since CS:GO uses DirectX on windows, the X,Y,Z vectors in the matrix are row major.

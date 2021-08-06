@@ -16,12 +16,13 @@ public:
 	WinScreenHandler();
 	~WinScreenHandler();
 
-	void SetScreenSize();
+	BOOL Init();
+
 	uint32_t GetScreenWidth();
 	uint32_t GetScreenHeight();
 
-	//This function is optional for debugging.
+#ifdef _DEBUG
 	void DrawLine(float StartX, float StartY, float EndX, float EndY);
+#endif
 
-	void MoveMouse(const Vector2& target, INT crosshairX, INT crosshairY);
 };

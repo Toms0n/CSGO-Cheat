@@ -13,18 +13,14 @@
 class CsgoCheats
 {
 private:
-	std::shared_ptr<ProcessHandler> m_Ph;
-	std::unique_ptr<MemoryManager> m_Mm;
-	std::unique_ptr<WinScreenHandler> m_Wsh;
-	std::unique_ptr<CMath> m_Cmath; // needed for aimbot
-	DWORD clientState; // needed for view angels
+	std::shared_ptr<ProcessHandler> m_Ph; // Needed for base addresses of dlls
+	std::shared_ptr<MemoryManager> m_Mm; // needed for RPM/WPM
+	std::shared_ptr<WinScreenHandler> m_Wsh; // needed for window size
+	std::shared_ptr<CMath> m_Cmath; // needed for aimbot
+	DWORD clientStateAddr; // needed for view angels
+	DWORD glowObjectManagerAddr; // needed for glow hack
 	INT crosshairX;
 	INT crosshairY;
-
-	/*
-	* Reads the team id of the given player from memory of the process
-	*/
-	INT GetTeamOfPlayer(DWORD playerAddr);
 
 	/*
 	* Gets the address pointing to the local player (which is the player that you are playing)
@@ -35,6 +31,11 @@ private:
 	* Get the address of the player using its index
 	*/
 	DWORD GetPlayerAddr(INT playerIndex);
+
+	/*
+	* Reads the team id of the given player from memory of the process
+	*/
+	INT GetTeamOfPlayer(DWORD playerAddr);
 
 	/*
 	* Get the eye position of the given player address and origin vector
@@ -63,9 +64,14 @@ private:
 	INT GetPlayerGlowIndex(DWORD playerAddr);
 
 	/*
-	* Gets the glow manager object memory address
+	* Sets the glow of the a player with given glowIdx to some preferred color
 	*/
-	DWORD GetGlowManagerAddr();
+	bool SetPlayerGlow(const INT glowIdx);
+
+	/*
+	* Gets the GlowStruct from memory of a player glowIdx
+	*/
+	inline GlowStruct GetPlayerGlow(const INT glowIdx);
 
 	/*
 	* Checks whether the player that we are reading from is a real player and not something else in memory/game.
@@ -147,13 +153,28 @@ private:
 	*/
 	DWORD FindClosestEnemyToCrosshair(uint32_t boneId);
 
+#ifdef _DEBUG
 	/*
-	// TODO: delete this
+	* Draws line from crosshair to closest enemy
 	*/
 	void FOR_DEBUGGING(DWORD closestEnemy, uint32_t boneId);
+#endif
 
 public:
-	CsgoCheats();
+	// Delete all default implicit constructors that the compiler defines.
+	CsgoCheats() = delete;
+	CsgoCheats(CsgoCheats const&) = delete;
+	CsgoCheats& operator = (CsgoCheats const&) = delete;
+	CsgoCheats(CsgoCheats&&) = delete;
+	CsgoCheats& operator = (CsgoCheats&&) = delete;
+
+	explicit CsgoCheats(
+		std::shared_ptr<ProcessHandler> _Ph,
+		std::shared_ptr<MemoryManager> _Mm,
+		std::shared_ptr<WinScreenHandler> _Wsh,
+		std::shared_ptr<CMath> _Cm
+	);
+
 	~CsgoCheats();
 
 	/*
@@ -164,10 +185,10 @@ public:
 	/*
 	* Enables aimbot. boneId is the bone to aim at e.g. HEAD_BONE.
 	*/
-	void AimbotCheat(uint32_t boneId);
+	void AimbotCheat(const uint32_t boneId);
 
 	/*
-	* TODO: Makes enemy entities glow through walls
+	* Makes enemy entities glow through walls
 	*/
 	void GlowWallhackCheat();
 };

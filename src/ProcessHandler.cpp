@@ -1,22 +1,19 @@
 #include "ProcessHandlerH.h"
 
 ProcessHandler::ProcessHandler()
+	:
+	h_Proc(nullptr)
 {
-	if (Init())
-	{
-		std::cout << "Sucessfully initialized ProcessHandler with process name: " << ProcName << std::endl;
-	}
-	else
-	{
-		std::cout << "Failed to initialize ProcessHandler to process " << ProcName << std::endl;
-	}
 }
 
 ProcessHandler::~ProcessHandler()
 {
-	assert(this->h_Proc); // the handle should be active to be able to close it
+	const auto closedStatus = CloseHandle(this->h_Proc);
+	
+	assert(closedStatus); // the handle should be active to be able to close it
 
-	if (CloseHandle(this->h_Proc))
+#ifdef _DEBUG
+	if (closedStatus)
 	{
 		std::cout << "Successfully closed handle: " << this->h_Proc << std::endl;
 	}
@@ -24,6 +21,7 @@ ProcessHandler::~ProcessHandler()
 	{
 		std::cout << "Failed to close handle: " << this->h_Proc << std::endl;
 	}
+#endif
 }
 
 BOOL ProcessHandler::Init()

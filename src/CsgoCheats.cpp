@@ -2,20 +2,27 @@
 #include "CsgoCheats.h"
 
 
-CsgoCheats::CsgoCheats()
+CsgoCheats::CsgoCheats(
+	std::shared_ptr<ProcessHandler> _Ph,
+	std::shared_ptr<MemoryManager> _Mm,
+	std::shared_ptr<WinScreenHandler> _Wsh,
+	std::shared_ptr<CMath> _Cm
+)
 	:
-	m_Ph(std::make_shared<ProcessHandler>()),
-	m_Mm(std::make_unique<MemoryManager>(m_Ph)),
-	m_Wsh(std::make_unique<WinScreenHandler>()),
-	m_Cmath(std::make_unique<CMath>()),
-	clientState(m_Mm->RPM<DWORD>(m_Ph->GetEngineBase() + signatures::dwClientState)),
-	crosshairX(m_Wsh->GetScreenWidth() / 2),
-	crosshairY(m_Wsh->GetScreenHeight() / 2)
+	m_Ph(_Ph),
+	m_Mm(_Mm),
+	m_Wsh(_Wsh),
+	m_Cmath(_Cm)
 {
+	clientStateAddr = m_Mm->RPM<DWORD>(m_Ph->GetEngineBase() + signatures::dwClientState);
+	glowObjectManagerAddr = m_Mm->RPM<DWORD>(m_Ph->GetClientBase() + signatures::dwGlowObjectManager);
+	crosshairX = m_Wsh->GetScreenWidth() / 2;
+	crosshairY = m_Wsh->GetScreenHeight() / 2;
 }
 
 CsgoCheats::~CsgoCheats()
 {
+	std::cout << "~CsgoCheats() Called!" << std::endl;
 }
 
 INT CsgoCheats::GetTeamOfPlayer(DWORD playerAddr)
@@ -48,9 +55,29 @@ INT CsgoCheats::GetPlayerGlowIndex(DWORD playerAddr)
 	return m_Mm->RPM<INT>(playerAddr + netvars::m_iGlowIndex);
 }
 
-DWORD CsgoCheats::GetGlowManagerAddr()
+GlowStruct CsgoCheats::GetPlayerGlow(const INT glowIdx)
 {
-	return m_Mm->RPM<INT>(m_Ph->GetClientBase() + signatures::dwGlowObjectManager);
+	return m_Mm->RPM<GlowStruct>(
+		glowObjectManagerAddr + 
+		(glowIdx * GLOW_IDX_SEPERATION) +
+		GLOW_VALUES_OFFSET
+	);
+}
+
+bool CsgoCheats::SetPlayerGlow(const INT glowIdx)
+{
+	auto g = GetPlayerGlow(glowIdx);
+	g.rbga.r = 1.f;
+	g.rbga.a = 0.7f;
+	g.renderOccluded = true;
+	g.renderUnoccluded = false;
+
+	return m_Mm->WPM<GlowStruct>(
+		glowObjectManagerAddr + 
+		(glowIdx * GLOW_IDX_SEPERATION) + 
+		GLOW_VALUES_OFFSET
+		, g
+	);
 }
 
 bool CsgoCheats::DormantCheck(DWORD playerAddr)
@@ -60,12 +87,12 @@ bool CsgoCheats::DormantCheck(DWORD playerAddr)
 
 Vector3 CsgoCheats::GetLocalPlayerViewAngles()
 {
-	return m_Mm->RPM<Vector3>(clientState + signatures::dwClientState_ViewAngles);
+	return m_Mm->RPM<Vector3>(clientStateAddr + signatures::dwClientState_ViewAngles);
 }
 
 bool CsgoCheats::SetLocalPlayerViewAngles(const Vector3& angles)
 {
-	return m_Mm->WPM<Vector3>(clientState + signatures::dwClientState_ViewAngles, angles);
+	return m_Mm->WPM<Vector3>(clientStateAddr + signatures::dwClientState_ViewAngles, angles);
 }
 
 viewMatrix CsgoCheats::GetViewMatrix()
@@ -146,7 +173,7 @@ void CsgoCheats::SetEnemySpotted(DWORD playerAddr, bool isSpotted)
 
 INT CsgoCheats::GetClientState()
 {
-	return m_Mm->RPM<INT>(clientState + signatures::dwClientState_State);
+	return m_Mm->RPM<INT>(clientStateAddr + signatures::dwClientState_State);
 }
 
 bool CsgoCheats::IsEntityImmune(DWORD playerAddr)
@@ -201,7 +228,7 @@ DWORD CsgoCheats::FindClosestEnemyToCrosshair(uint32_t boneId)
 		const Vector3 playerBoneWorldPos = GetPlayerBoneLocation(entity, boneId);
 		Vector2 screenPos;
 
-		WorldToScreen(playerBoneWorldPos, screenPos); // TODO: check if the returned value is true and then continue
+		WorldToScreen(playerBoneWorldPos, screenPos);
 
 		const FLOAT currEntityDist = 
 			(float)FastSQRT(pow(screenPos.x - crosshairX, 2) + pow(screenPos.y - crosshairY, 2));
@@ -216,25 +243,6 @@ DWORD CsgoCheats::FindClosestEnemyToCrosshair(uint32_t boneId)
 	return closestEnemyAddr;
 }
 
-void CsgoCheats::RadarCheat()
-{
-	const auto localPlayerAddr = GetLocalPlayerAddr();
-	const auto localPlayerTeam = GetTeamOfPlayer(localPlayerAddr);
-
-	for (unsigned int i = 1; i < 64; i++)
-	{
-		const auto playerAddr = GetPlayerAddr(i);
-
-		// only set enemies as spotted
-		if (GetTeamOfPlayer(playerAddr) != localPlayerTeam &&
-			IsEntityValid(playerAddr))
-		{
-			SetEnemySpotted(playerAddr, 1);
-		}
-	}
-}
-
-// TODO: MAKE SURE TO DELETE THIS FUNC AFTER DEBUGGING/TESTING
 void CsgoCheats::FOR_DEBUGGING(DWORD closestEnemy, uint32_t boneId)
 {
 	const Vector3 playerBoneWorldPos = GetPlayerBoneLocation(closestEnemy, boneId);
@@ -256,20 +264,40 @@ Vector3 CsgoCheats::GetPlayerEyePos(DWORD playerAddr, const Vector3& playerOrigi
 	return playerOrigin + m_Mm->RPM<Vector3>(playerAddr + netvars::m_vecViewOffset);
 }
 
-void CsgoCheats::AimbotCheat(uint32_t boneId)
+void CsgoCheats::RadarCheat()
+{
+	const auto localPlayerAddr = GetLocalPlayerAddr();
+	const auto localPlayerTeam = GetTeamOfPlayer(localPlayerAddr);
+
+	for (unsigned int i = 1; i < 64; i++)
+	{
+		const auto playerAddr = GetPlayerAddr(i);
+
+		// only set enemies as spotted
+		if (GetTeamOfPlayer(playerAddr) != localPlayerTeam &&
+			IsEntityValid(playerAddr))
+		{
+			SetEnemySpotted(playerAddr, 1);
+		}
+	}
+}
+
+void CsgoCheats::AimbotCheat(const uint32_t boneId)
 {
 	// TODO: finding closest enemy here in inf. loop in single thread is not efficient
 	// make new thread with only task to find closest enemy and start it first here
+	// or make new thread that executes the AimbotCheat function in an inf loop (optional).
 	const DWORD closestEnemyAddr = FindClosestEnemyToCrosshair(boneId);
-
+	
 	if (closestEnemyAddr != NULL)
 	{
-		//FOR_DEBUGGING(closestEnemyAddr, boneId);
-
+		FOR_DEBUGGING(closestEnemyAddr, boneId);
 		const DWORD localPlayerAddr = GetLocalPlayerAddr();
 
 		/* ENABLE AIMBOT WHEN GIVEN KEY IS PRESSED */
-		if (GetAsyncKeyState(VK_LBUTTON) && GetEnemySpotted(closestEnemyAddr))
+		if (GetAsyncKeyState(VK_LBUTTON) 
+			//&& GetEnemySpotted(closestEnemyAddr)
+		)
 		{
 			const auto localPlayerPos = GetPlayerLocation(localPlayerAddr);
 			const auto enemyPlayerPos = GetPlayerLocation(closestEnemyAddr);
@@ -279,6 +307,7 @@ void CsgoCheats::AimbotCheat(uint32_t boneId)
 
 			const Vector3 currAimAngles = GetLocalPlayerViewAngles();
 			Vector3 aimAngles = m_Cmath->CalcAngle(localPlayerEyePos, enemyHeadPos);
+			//Vector3 aimAngles = m_Cmath->CalcAngle(localPlayerPos, enemyPlayerPos);
 
 			// remove recoil
 			aimAngles -= GetLocalPlayerPunchAngles() * 2.f;
@@ -300,7 +329,22 @@ void CsgoCheats::AimbotCheat(uint32_t boneId)
 
 void CsgoCheats::GlowWallhackCheat()
 {
-	// TODO:
+	const auto localPlayerAddr = GetLocalPlayerAddr();
+	const auto localPlayerTeam = GetTeamOfPlayer(localPlayerAddr);
+
+	for (unsigned int i = 1; i < 64; i++)
+	{
+		const auto playerAddr = GetPlayerAddr(i);
+
+		if (playerAddr != NULL)
+		{
+			if (!IsEntityValid(playerAddr)) continue;
+			if (GetTeamOfPlayer(playerAddr) == localPlayerTeam) continue;
+
+			const auto enemyGlowIdx = GetPlayerGlowIndex(playerAddr);
+			SetPlayerGlow(enemyGlowIdx);
+		}
+	}
 }
 
 
