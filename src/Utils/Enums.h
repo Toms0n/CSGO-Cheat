@@ -2,8 +2,11 @@
 // This header defines different useful enums, structs and constants.
 
 #pragma once
+#include <cstdint>
 
-#pragma region FLAGS
+// <code>#pragma region ...</code> only applies to VSC and some compilers might ignore it or give warnings about it
+// so what this does depends on how the compiler treats it
+#pragma region FLAGS 
 
 #define IN_ATTACK					(1 << 0)
 #define IN_JUMP						(1 << 1)
@@ -72,15 +75,15 @@
 #pragma endregion
 
 // Different LifeStates for an entity
-enum LifeState : int
+enum class LifeState : std::uint8_t
 {
 	LIFE_ALIVE = 0,	// alive
 	LIFE_DYING = 1, // playing death animation or still falling off of a ledge waiting to hit ground
 	LIFE_DEAD = 2	// dead. lying still.
 };
 
-// Identifiers for classes
-enum ClassIDs : int
+// Identifiers for classes (NOTE: might be outdated)
+enum class ClassIDs : std::uint32_t
 {
     AK47 = 1,
     BaseAnimating = 2,
@@ -158,11 +161,11 @@ enum ClassIDs : int
     WeaponXM1014 = 233,
     ParticleSmokeGrenade = 237,
     Weapon = 0xBEEF,
-    Unknown_CLSID = 0xDEAD
+    Unknown = 0xDEAD
 };
 
-// Hardcoded hitboxes
-enum HitboxList : int
+// Hardcoded hitboxes (NOTE: might be outdated by now)
+enum class HitboxList : std::uint8_t
  {
     HITBOX_NONE,
     HITBOX_PELVIS,
@@ -192,7 +195,7 @@ enum HitboxList : int
 };
 
 // Hardcoded bones (you can make this enum even more wide)
-enum BoneList : int
+enum class BoneIDs : std::uint8_t
 {
 	PELVIS = 0,
 	BONE_HEAD = 8,
@@ -200,8 +203,8 @@ enum BoneList : int
 	BONE_BODY = 80,
 };
 
-// Identifiers for weapons
-enum WeaponIDI: int 
+// Identifiers for weapons (NOTE: might be outdated)
+enum class WeaponIDs : std::uint16_t
 {
 	WEAPON_DEAGLE = 1,
 	WEAPON_ELITE = 2,
@@ -259,7 +262,7 @@ enum WeaponIDI: int
 };
 
 // Identifiers for teams
-enum Teams : int
+enum class TeamIDs : std::uint8_t
 {
 	NONE,
 	SPEC,
