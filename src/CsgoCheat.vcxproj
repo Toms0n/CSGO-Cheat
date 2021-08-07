@@ -147,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CsgoCheats.h" />
+    <ClInclude Include="Utils\Utils.h" />
     <ClInclude Include="WinScreenHandler.h" />
     <ClInclude Include="MemoryManager.h" />
     <ClInclude Include="Offsets.h" />

@@ -13,5 +13,6 @@
     <ClInclude Include="MemoryManager.h" />
     <ClInclude Include="ProcessHandler.h" />
     <ClInclude Include="WinScreenHandler.h" />
+    <ClInclude Include="Utils\Utils.h" />
   </ItemGroup>
 </Project>
